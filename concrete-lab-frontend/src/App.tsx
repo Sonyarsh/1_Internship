@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
@@ -10,28 +10,40 @@ import Profile from './pages/Profile'
 import Favorites from './pages/Favorites'
 import Cart from './pages/Cart'
 import AuthModal from './components/AuthModal'
+import { clearSession, loadStoredUser, User } from './api/auth'
 
 const App: React.FC = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
-  const [user, setUser] = useState<{ name: string; role: 'user' | 'admin' } | null>(null)
+  const [user, setUser] = useState<User | null>(null)
 
-  const toggleAuthModal = () => setIsAuthModalOpen(!isAuthModalOpen)
+  // Восстановить сессию после обновления страницы
+  useEffect(() => {
+    setUser(loadStoredUser())
+  }, [])
+
+  const handleLogout = () => {
+    clearSession()
+    setUser(null)
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900">
-      <Header 
-        user={user} 
-        onLoginClick={toggleAuthModal} 
-        onLogout={() => setUser(null)}
+      <Header
+        user={user}
+        onLoginClick={() => setIsAuthModalOpen(true)}
+        onLogout={handleLogout}
       />
-      
+
       <main className="flex-grow container mx-auto px-4 py-8">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services userRole={user?.role} />} />
-          <Route path="/registration" element={<Registration />} />
-          <Route path="/profile" element={<Profile user={user} />} />
+          <Route path="/registration" element={<Registration onAuth={setUser} />} />
+          <Route
+            path="/profile"
+            element={<Profile user={user} onLogout={handleLogout} />}
+          />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/cart" element={<Cart />} />
         </Routes>
@@ -40,12 +52,12 @@ const App: React.FC = () => {
       <Footer />
 
       {isAuthModalOpen && (
-        <AuthModal 
-          onClose={toggleAuthModal} 
+        <AuthModal
+          onClose={() => setIsAuthModalOpen(false)}
           onLogin={(userData) => {
             setUser(userData)
             setIsAuthModalOpen(false)
-          }} 
+          }}
         />
       )}
     </div>

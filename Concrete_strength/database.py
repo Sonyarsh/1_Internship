@@ -1,51 +1,24 @@
-# from sqlalchemy import create_engine
-# from sqlalchemy.orm import sessionmaker
-# from sqlalchemy.ext.declarative import declarative_base
-
-# # URL базы данных SQLite (как указано в README.md)
-# DB_URL = 'sqlite:///./concrete_strength.db'
-
-# # Создание engine
-# engine = create_engine(DB_URL, connect_args={"check_same_thread": False})
-
-# # Фабрика сессий
-# SessionLocal = sessionmaker(autoflush=False, autocommit=False, bind=engine)
-
-# # Базовый класс для моделей
-# Base = declarative_base()
-
-# # Функция получения сессии
-# def get_session():
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
-
-
-
-
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, declarative_base
 
-# URL базы данных PostgreSQL
-DB_URL = 'postgresql://username:password@localhost:5432/mydatabase'
+# Для учёбы используем SQLite — файл создаётся рядом с проектом.
+# Когда будете готовы к PostgreSQL, замените DB_URL на:
+# postgresql://USER:PASSWORD@localhost:5432/DB_NAME
+DB_URL = "sqlite:///./concrete_strength.db"
 
-# Создание engine
-engine = create_engine(DB_URL)
+engine = create_engine(
+    DB_URL,
+    connect_args={"check_same_thread": False},  # нужно только для SQLite
+)
 
-# Фабрика сессий
 SessionLocal = sessionmaker(autoflush=False, autocommit=False, bind=engine)
-
-# Базовый класс для моделей
 Base = declarative_base()
 
-# Функция получения сессии
+
 def get_session():
+    """Dependency FastAPI: одна сессия БД на запрос."""
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
-

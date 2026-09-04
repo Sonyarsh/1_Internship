@@ -1,29 +1,46 @@
 import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { X } from 'lucide-react'
+import { loginUser, saveSession, User } from '../api/auth'
+import axios from 'axios'
 
 interface AuthModalProps {
   onClose: () => void
-  onLogin: (user: { name: string; role: 'user' | 'admin' }) => void
+  onLogin: (user: User) => void
 }
 
 const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Имитация авторизации
-    if (email === 'admin@test.com') {
-      onLogin({ name: 'Администратор', role: 'admin' })
-    } else {
-      onLogin({ name: 'Иван Иванов', role: 'user' })
+    setError('')
+    setLoading(true)
+    try {
+      const result = await loginUser({ email, password })
+      saveSession(result.access_token, result.user)
+      onLogin(result.user)
+      navigate('/profile')
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const detail = err.response?.data?.detail
+        setError(typeof detail === 'string' ? detail : 'Не удалось войти')
+      } else {
+        setError('Не удалось войти. Проверьте, что API запущен.')
+      }
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md relative animate-in fade-in zoom-in duration-200">
-        <button 
+        <button
           onClick={onClose}
           className="absolute top-4 right-4 p-1 hover:bg-gray-100 rounded-full text-gray-500"
         >
@@ -32,12 +49,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
 
         <div className="p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Авторизация</h2>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -47,26 +64,33 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Пароль</label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 required
+                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                 placeholder="••••••••"
               />
             </div>
-            
-            <button 
+
+            {error && <p className="text-sm text-red-600">{error}</p>}
+
+            <button
               type="submit"
-              className="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors mt-4"
+              disabled={loading}
+              className="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors mt-4 disabled:opacity-60"
             >
-              Войти
+              {loading ? 'Вход...' : 'Войти'}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-600 mt-6">
-            Нет аккаунта? <a href="/registration" className="text-primary hover:underline">Зарегистрироваться</a>
+            Нет аккаунта?{' '}
+            <Link to="/registration" onClick={onClose} className="text-primary hover:underline">
+              Зарегистрироваться
+            </Link>
           </p>
         </div>
       </div>

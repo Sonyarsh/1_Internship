@@ -1,7 +1,7 @@
 import React from 'react'
 
 interface ServicesProps {
-  userRole?: 'user' | 'admin'
+  userRole?: string
 }
 
 const Services: React.FC<ServicesProps> = ({ userRole }) => {

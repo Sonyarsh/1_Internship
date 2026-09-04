@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+pydantic[email]
+bcrypt
+PyJWT
+python-multipart

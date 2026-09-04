@@ -1,35 +1,38 @@
 import uvicorn
 from fastapi import FastAPI
-from database import engine, Base
-from routers import router
-import models  # Импортируем модели, чтобы Base о них узнал
+from fastapi.middleware.cors import CORSMiddleware
 
-# Создаем таблицы в базе данных
+from database import engine, Base
+from auth_router import router as auth_router
+import user_model  # регистрирует таблицу users в Base.metadata
+
 Base.metadata.create_all(bind=engine)
 
-# Создаем экземпляр FastAPI
 app = FastAPI(title="Concrete Strength API")
 
-# Подключаем роутер по префиксу /concrete_strength
-app.include_router(router, prefix='/concrete_strength', tags=["Concrete Strength"])
-
-# Основной эндпоинт
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-# Запуск сервера
-if __name__ == '__main__':
-    uvicorn.run("main:app", host='127.0.0.1', port=8080, reload=True)
-
-
-
-from fastapi import FastAPI
-from routers import router
-
-
-app = FastAPI(
-    title="Concrete Strength API"
+# Разрешаем запросы с React (Vite обычно на порту 5173)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+        "http://localhost:5180",
+        "http://127.0.0.1:5180",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-app.include_router(router)
+app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+
+
+@app.get("/")
+def read_root():
+    return {"status": "ok", "docs": "/docs"}
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="127.0.0.1", port=8080, reload=False)

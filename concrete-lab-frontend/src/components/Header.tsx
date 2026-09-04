@@ -1,9 +1,10 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { ShoppingCart, User, Heart, LogOut } from 'lucide-react'
+import type { User as AuthUser } from '../api/auth'
 
 interface HeaderProps {
-  user: { name: string; role: 'user' | 'admin' } | null
+  user: AuthUser | null
   onLoginClick: () => void
   onLogout: () => void
 }
