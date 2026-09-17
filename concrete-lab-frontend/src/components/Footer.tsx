@@ -23,7 +23,7 @@ const Footer: React.FC = () => {
             <h4 className="text-lg font-semibold mb-4">Контакты</h4>
             <ul className="space-y-2 text-gray-400">
               <li>Адрес: г. Минск, ул. Строителей, 10</li>
-              <li>Телефон: +375 (29) 000-00-00</li>
+              <li>Телефон: +375 (29) 112-21-12</li>
               <li>Email: info@concretelab.by</li>
             </ul>
           </div>

@@ -1,4 +1,4 @@
-cd import React from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, CheckCircle } from 'lucide-react'
 
@@ -9,7 +9,7 @@ const Home: React.FC = () => {
       <section className="relative h-[500px] flex items-center justify-center text-center overflow-hidden rounded-3xl">
         <div className="absolute inset-0 bg-blue-900 bg-opacity-60 z-10"></div>
         <img 
-          src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=2070&auto=format&fit=crop" 
+          src="https://cdn1.tenchat.ru/static/vbc-gostinder/2025-01-28/compressed/5e42afb4-1073-4e43-b5a7-fc9d63562a53.jpeg?width=720&height=720&fmt=webp" 
           alt="Concrete Testing" 
           className="absolute inset-0 w-full h-full object-cover"
         />
