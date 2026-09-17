@@ -21,6 +21,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogout }) => {
         <nav className="hidden md:flex space-x-6">
           <Link to="/about" className="hover:text-primary transition-colors">О нас</Link>
           <Link to="/services" className="hover:text-primary transition-colors">Услуги</Link>
+          <Link to="/tests" className="hover:text-primary transition-colors">Испытания</Link>
         </nav>
 
         <div className="flex items-center space-x-4">

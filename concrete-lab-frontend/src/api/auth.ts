@@ -1,7 +1,8 @@
 import axios from 'axios'
 
+// Через proxy Vite (/api → http://127.0.0.1:8080) — меньше проблем с CORS
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8080',
+  baseURL: '/api',
 })
 
 export type User = {

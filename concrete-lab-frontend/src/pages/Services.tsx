@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 interface ServicesProps {
   userRole?: string
@@ -10,26 +11,27 @@ const Services: React.FC<ServicesProps> = ({ userRole }) => {
       id: 1,
       title: 'Испытание на сжатие',
       description: 'Определение фактического класса прочности бетона по контрольным образцам-кубам.',
-      price: 'от 50 BYN'
+      price: 'от 50 BYN',
+      to: '/tests',
     },
     {
       id: 2,
       title: 'Морозостойкость',
       description: 'Определение способности бетона сохранять свои свойства при многократном замораживании и оттаивании.',
-      price: 'от 120 BYN'
+      price: 'от 120 BYN',
     },
     {
       id: 3,
       title: 'Водонепроницаемость',
       description: 'Определение способности бетона не пропускать воду под давлением.',
-      price: 'от 100 BYN'
+      price: 'от 100 BYN',
     },
     {
       id: 4,
       title: 'Неразрушающий контроль',
       description: 'Определение прочности бетона в конструкциях методами ударного импульса или ультразвука.',
-      price: 'от 80 BYN'
-    }
+      price: 'от 80 BYN',
+    },
   ]
 
   return (
@@ -50,9 +52,22 @@ const Services: React.FC<ServicesProps> = ({ userRole }) => {
             <p className="text-gray-600 mb-6 flex-grow">{service.description}</p>
             <div className="flex justify-between items-center mt-auto">
               <span className="text-primary font-bold text-lg">{service.price}</span>
-              <button className="bg-primary text-white px-6 py-2 rounded-xl hover:bg-primary-dark transition-colors">
-                Заказать
-              </button>
+              {service.to ? (
+                <Link
+                  to={service.to}
+                  className="bg-primary text-white px-6 py-2 rounded-xl hover:bg-primary-dark transition-colors"
+                >
+                  Заказать
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="bg-gray-200 text-gray-500 px-6 py-2 rounded-xl cursor-not-allowed"
+                >
+                  Скоро
+                </button>
+              )}
             </div>
           </div>
         ))}

@@ -9,6 +9,7 @@ import Registration from './pages/Registration'
 import Profile from './pages/Profile'
 import Favorites from './pages/Favorites'
 import Cart from './pages/Cart'
+import Tests from './pages/Tests'
 import AuthModal from './components/AuthModal'
 import { clearSession, loadStoredUser, User } from './api/auth'
 
@@ -39,6 +40,10 @@ const App: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services userRole={user?.role} />} />
+          <Route
+            path="/tests"
+            element={<Tests user={user} onLoginClick={() => setIsAuthModalOpen(true)} />}
+          />
           <Route path="/registration" element={<Registration onAuth={setUser} />} />
           <Route
             path="/profile"

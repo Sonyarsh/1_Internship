@@ -93,12 +93,21 @@ class ConcreteStrength(Base):
         if self.volume_v != 0:
             self.density_avg = self.mass_m / self.volume_v
 
-        self.constant_c1 = 100 / self.base_b1
-        self.flatness_deviation = self.constant_c1 * self.o1 / 2
-        self.concavity_convexity = self.constant_c1 * (self.o2 - self.o1 / 4)
+        if self.base_b1 and self.base_b1 != 0:
+            self.constant_c1 = 100 / self.base_b1
+            self.flatness_deviation = self.constant_c1 * self.o1 / 2
+            self.concavity_convexity = self.constant_c1 * (self.o2 - self.o1 / 4)
+        else:
+            self.constant_c1 = None
+            self.flatness_deviation = None
+            self.concavity_convexity = None
 
-        self.constant_c2 = 100 / self.base_b2
-        self.perpendicularity_deviation = self.constant_c2 * self.o3
+        if self.base_b2 and self.base_b2 != 0:
+            self.constant_c2 = 100 / self.base_b2
+            self.perpendicularity_deviation = self.constant_c2 * self.o3
+        else:
+            self.constant_c2 = None
+            self.perpendicularity_deviation = None
 
         self.working_area_a = self.a_avg * self.b_avg
         if self.working_area_a != 0:

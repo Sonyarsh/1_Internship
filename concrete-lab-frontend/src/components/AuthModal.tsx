@@ -27,8 +27,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
       navigate('/profile')
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        const detail = err.response?.data?.detail
-        setError(typeof detail === 'string' ? detail : 'Не удалось войти')
+        if (!err.response) {
+          setError('Нет связи с API. Запустите python main.py и проверьте порт 8080.')
+        } else {
+          const detail = err.response.data?.detail
+          if (typeof detail === 'string') {
+            setError(detail)
+          } else if (Array.isArray(detail)) {
+            setError(detail.map((d: { msg?: string }) => d.msg).filter(Boolean).join('; ') || 'Ошибка данных')
+          } else {
+            setError(`Ошибка входа (${err.response.status})`)
+          }
+        }
       } else {
         setError('Не удалось войти. Проверьте, что API запущен.')
       }
