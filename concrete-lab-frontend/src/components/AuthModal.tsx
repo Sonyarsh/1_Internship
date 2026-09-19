@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { X } from 'lucide-react'
+import { FlaskConical, LockKeyhole, X } from 'lucide-react'
 import { loginUser, saveSession, User } from '../api/auth'
 import axios from 'axios'
 
@@ -48,55 +48,68 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md relative animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/80 p-4 backdrop-blur-sm">
+      <div className="relative w-full max-w-md overflow-hidden border-t-4 border-primary bg-white shadow-2xl">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1 hover:bg-gray-100 rounded-full text-gray-500"
+          className="absolute right-4 top-4 rounded-md p-2 text-slate-500 transition hover:bg-slate-100"
+          aria-label="Закрыть"
         >
-          <X size={24} />
+          <X size={21} />
         </button>
 
-        <div className="p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Авторизация</h2>
+        <div className="p-8 sm:p-10">
+          <div className="flex items-center gap-3">
+            <span className="grid h-11 w-11 place-items-center bg-primary text-white">
+              <FlaskConical size={22} />
+            </span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-primary">БетонЛаб</p>
+              <h2 className="text-2xl font-black text-navy">Вход в кабинет</h2>
+            </div>
+          </div>
+          <p className="mb-7 mt-4 text-sm leading-relaxed text-slate-500">
+            Авторизуйтесь, чтобы открыть свои испытания и протоколы.
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="lab-label">Email</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                className="lab-input"
                 placeholder="example@mail.com"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Пароль</label>
+              <label className="lab-label">Пароль</label>
               <input
                 type="password"
                 required
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
+                className="lab-input"
                 placeholder="••••••••"
               />
             </div>
 
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="border-l-4 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-primary-dark transition-colors mt-4 disabled:opacity-60"
+              className="lab-button-primary mt-4 w-full gap-2"
             >
+              <LockKeyhole size={17} />
               {loading ? 'Вход...' : 'Войти'}
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-600 mt-6">
+          <p className="mt-6 border-t border-slate-100 pt-5 text-center text-sm text-slate-500">
             Нет аккаунта?{' '}
             <Link to="/registration" onClick={onClose} className="text-primary hover:underline">
               Зарегистрироваться

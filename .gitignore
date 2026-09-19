@@ -1,7 +1,30 @@
+# Python
 .venv/
 **/__pycache__/
 *.pyc
+*.pyo
 *.db
+
+# Node / Vite
 node_modules/
+concrete-lab-frontend/node_modules/
+**/node_modules/
+dist/
+.vite/
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+Desktop.ini
+
+# Word temp files
 plans/~$*
 ~$*
+**/~$*
+
+# Local drafts outside project folders (duplicates)
+/database.py
+/main.py
+/src/

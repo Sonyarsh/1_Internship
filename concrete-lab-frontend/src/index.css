@@ -3,14 +3,11 @@
 @tailwind utilities;
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Segoe UI", Inter, system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
+  color: #18313f;
+  background: #f5f8fa;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -18,32 +15,55 @@
 }
 
 a {
-  font-weight: 500;
-  color: #646cff;
   text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-content: center;
   min-width: 320px;
   min-height: 100vh;
+  background: #f5f8fa;
 }
 
 #root {
   width: 100%;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+::selection {
+  color: white;
+  background: #0078ad;
+}
+
+@layer components {
+  .site-container {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
   }
-  a:hover {
-    color: #747bff;
+
+  .section-eyebrow {
+    @apply mb-3 inline-flex items-center rounded-full bg-red-600 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-white;
+  }
+
+  .section-title {
+    @apply text-3xl font-extrabold leading-tight text-navy md:text-4xl;
+  }
+
+  .lab-card {
+    @apply border-t-4 border-primary bg-white p-6 shadow-[0_12px_35px_rgba(0,52,80,.08)] sm:p-8;
+  }
+
+  .lab-label {
+    @apply mb-1.5 block text-sm font-bold text-navy;
+  }
+
+  .lab-input {
+    @apply w-full rounded-md border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20;
+  }
+
+  .lab-button-primary {
+    @apply inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 font-bold text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .lab-button-secondary {
+    @apply inline-flex items-center justify-center rounded-md border border-primary px-6 py-3 font-bold text-primary transition hover:bg-primary-light;
   }
 }

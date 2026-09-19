@@ -47,7 +47,7 @@ const defaultForm: ConcreteStrengthCreate = {
   loading_speed: 0.6,
   loading_time: 60,
   max_force_f: 300,
-  scale_factor_alpha: 1,
+  scale_factor_alpha: 1.0,
   visual_inspection_broken: '',
   destruction_scheme: '',
 }
@@ -85,7 +85,10 @@ const Tests: React.FC<TestsProps> = ({ user, onLoginClick }) => {
       'loading_speed', 'loading_time', 'max_force_f', 'scale_factor_alpha',
     ]
     if (numericKeys.includes(name)) {
-      setForm({ ...form, [name]: value === '' ? 0 : Number(value) })
+      const num = value === '' ? 0 : Number(value)
+      const rounded =
+        name === 'scale_factor_alpha' ? Math.round(num * 100) / 100 : num
+      setForm({ ...form, [name]: rounded })
     } else {
       setForm({ ...form, [name]: value })
     }
@@ -133,18 +136,19 @@ const Tests: React.FC<TestsProps> = ({ user, onLoginClick }) => {
 
   if (!user) {
     return (
-      <div className="text-center py-20">
-        <h2 className="text-2xl font-bold mb-4">Нужен вход в систему</h2>
-        <p className="text-gray-600 mb-6">
+      <div className="mx-auto max-w-xl py-20 text-center">
+        <span className="section-eyebrow">Испытания</span>
+        <h2 className="mt-2 text-3xl font-black text-navy">Нужен вход в систему</h2>
+        <p className="mb-6 mt-4 text-slate-600">
           Записи испытаний доступны только авторизованным пользователям.
         </p>
         <button
           onClick={onLoginClick}
-          className="bg-primary text-white px-6 py-3 rounded-xl font-semibold"
+          className="lab-button-primary"
         >
           Войти
         </button>
-        <p className="mt-4 text-sm text-gray-500">
+        <p className="mt-4 text-sm text-slate-500">
           Нет аккаунта? <Link to="/registration" className="text-primary hover:underline">Регистрация</Link>
         </p>
       </div>
@@ -152,17 +156,18 @@ const Tests: React.FC<TestsProps> = ({ user, onLoginClick }) => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-8 space-y-10">
+    <div className="mx-auto max-w-5xl space-y-10 py-8">
       <div>
-        <h1 className="text-3xl font-bold mb-2">Испытания на сжатие</h1>
-        <p className="text-gray-600">
+        <span className="section-eyebrow">Новый протокол</span>
+        <h1 className="section-title">Испытание бетона на сжатие</h1>
+        <p className="mt-3 text-slate-600">
           Заполните протокол. Средние размеры и прочность fc посчитает сервер.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white border border-gray-100 rounded-3xl p-8 space-y-8 shadow-sm">
-        <section className="space-y-4">
-          <h2 className="text-xl font-bold">Об объекте</h2>
+      <form onSubmit={handleSubmit} className="lab-card space-y-8">
+        <section className="space-y-4 border-b border-slate-200 pb-8">
+          <h2 className="text-xl font-black text-navy"><span className="mr-3 text-primary">01</span>Об объекте</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field label="Заявитель" value={form.applicant_info} onChange={(v) => setField('applicant_info', v)} required />
             <Field label="Изготовитель" value={form.manufacturer_info} onChange={(v) => setField('manufacturer_info', v)} required />
@@ -180,9 +185,9 @@ const Tests: React.FC<TestsProps> = ({ user, onLoginClick }) => {
           </div>
         </section>
 
-        <section className="space-y-4">
-          <h2 className="text-xl font-bold">Геометрия образца (мм)</h2>
-          <p className="text-sm text-gray-500">По умолчанию куб 100×100×100 — можно менять.</p>
+        <section className="space-y-4 border-b border-slate-200 pb-8">
+          <h2 className="text-xl font-black text-navy"><span className="mr-3 text-primary">02</span>Геометрия образца (мм)</h2>
+          <p className="text-sm text-slate-500">По умолчанию куб 100×100×100 — можно менять.</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {(['a1', 'a2', 'a3', 'a4'] as const).map((k, i) => (
               <Field key={k} label={`a${i + 1}`} type="number" value={String(form[`${k}_geometry` as keyof ConcreteStrengthCreate])} onChange={(v) => setField(`${k}_geometry` as keyof ConcreteStrengthCreate, v)} required />
@@ -198,7 +203,7 @@ const Tests: React.FC<TestsProps> = ({ user, onLoginClick }) => {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-xl font-bold">Измерения и нагружение</h2>
+          <h2 className="text-xl font-black text-navy"><span className="mr-3 text-primary">03</span>Измерения и нагружение</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Field label="О1" type="number" value={String(form.o1)} onChange={(v) => setField('o1', v)} required />
             <Field label="База B1" type="number" value={String(form.base_b1)} onChange={(v) => setField('base_b1', v)} required />
@@ -208,7 +213,14 @@ const Tests: React.FC<TestsProps> = ({ user, onLoginClick }) => {
             <Field label="Скорость v" type="number" value={String(form.loading_speed)} onChange={(v) => setField('loading_speed', v)} required />
             <Field label="Время T" type="number" value={String(form.loading_time)} onChange={(v) => setField('loading_time', v)} required />
             <Field label="Сила F" type="number" value={String(form.max_force_f)} onChange={(v) => setField('max_force_f', v)} required />
-            <Field label="Коэф. α" type="number" value={String(form.scale_factor_alpha)} onChange={(v) => setField('scale_factor_alpha', v)} required />
+            <Field
+              label="Коэф. α"
+              type="number"
+              step="0.01"
+              value={Number(form.scale_factor_alpha).toFixed(2)}
+              onChange={(v) => setField('scale_factor_alpha', v)}
+              required
+            />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field label="Осмотр после разрушения" value={form.visual_inspection_broken || ''} onChange={(v) => setField('visual_inspection_broken', v)} />
@@ -216,43 +228,58 @@ const Tests: React.FC<TestsProps> = ({ user, onLoginClick }) => {
           </div>
         </section>
 
-        {error && <p className="text-red-600 text-sm">{error}</p>}
-        {success && <p className="text-green-700 text-sm">{success}</p>}
+        {error && <p className="border-l-4 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+        {success && <p className="border-l-4 border-green-600 bg-green-50 px-4 py-3 text-sm text-green-700">{success}</p>}
 
         <button
           type="submit"
           disabled={loading}
-          className="bg-primary text-white px-8 py-3 rounded-xl font-bold hover:bg-primary-dark disabled:opacity-60"
+          className="lab-button-primary"
         >
           {loading ? 'Сохранение...' : 'Сохранить испытание'}
         </button>
       </form>
 
       <section>
-        <h2 className="text-2xl font-bold mb-4">Мои записи</h2>
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-widest text-primary">Архив</span>
+            <h2 className="mt-1 text-2xl font-black text-navy">Мои протоколы</h2>
+          </div>
+          <span className="text-sm text-slate-500">Записей: {records.length}</span>
+        </div>
         {records.length === 0 ? (
           <p className="text-gray-500">Пока нет сохранённых испытаний.</p>
         ) : (
-          <div className="overflow-x-auto bg-white rounded-2xl border border-gray-100">
+          <div className="overflow-x-auto border-t-4 border-primary bg-white shadow-[0_12px_35px_rgba(0,52,80,.08)]">
             <table className="w-full text-sm text-left">
-              <thead className="bg-gray-50 text-gray-600">
+              <thead className="bg-navy text-white">
                 <tr>
                   <th className="px-4 py-3">ID</th>
                   <th className="px-4 py-3">Заявитель</th>
                   <th className="px-4 py-3">Класс</th>
                   <th className="px-4 py-3">Партия</th>
                   <th className="px-4 py-3">fc</th>
+                  <th className="px-4 py-3"></th>
                 </tr>
               </thead>
               <tbody>
                 {records.map((r) => (
-                  <tr key={r.id} className="border-t border-gray-100">
+                  <tr key={r.id} className="border-t border-slate-100 transition hover:bg-primary-light">
                     <td className="px-4 py-3">{r.id}</td>
                     <td className="px-4 py-3">{r.applicant_info}</td>
                     <td className="px-4 py-3">{r.concrete_class}</td>
                     <td className="px-4 py-3">{r.batch_N}/{r.sample_N}/{r.series_N}</td>
                     <td className="px-4 py-3 font-semibold">
                       {r.fc_cube_batch_i_sample_j_series_k?.toFixed(2) ?? '—'}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link
+                        to={`/tests/${r.id}`}
+                        className="font-bold text-primary hover:underline"
+                      >
+                        Открыть
+                      </Link>
                     </td>
                   </tr>
                 ))}
@@ -271,23 +298,25 @@ function Field({
   onChange,
   type = 'text',
   required = false,
+  step = 'any',
 }: {
   label: string
   value: string
   onChange: (v: string) => void
   type?: string
   required?: boolean
+  step?: string
 }) {
   return (
     <label className="block text-sm">
-      <span className="text-gray-600 mb-1 block">{label}</span>
+      <span className="lab-label">{label}</span>
       <input
         type={type}
-        step="any"
+        step={step}
         required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-primary"
+        className="lab-input"
       />
     </label>
   )
