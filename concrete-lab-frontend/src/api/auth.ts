@@ -62,12 +62,36 @@ export async function loginUser(data: {
   return result
 }
 
+export function saveUser(user: User) {
+  localStorage.setItem(USER_KEY, JSON.stringify(user))
+}
+
 export async function fetchMe(): Promise<User> {
   const token = getToken()
   const { data } = await api.get<User>('/auth/me', {
     headers: { Authorization: `Bearer ${token}` },
   })
   return data
+}
+
+export async function updateProfile(name: string): Promise<User> {
+  const token = getToken()
+  const { data } = await api.patch<User>(
+    '/auth/me',
+    { name },
+    { headers: { Authorization: `Bearer ${token}` } }
+  )
+  return data
+}
+
+export async function changePassword(data: {
+  current_password: string
+  new_password: string
+}): Promise<void> {
+  const token = getToken()
+  await api.post('/auth/change-password', data, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
 }
 
 export default api

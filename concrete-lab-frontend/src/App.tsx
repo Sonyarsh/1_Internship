@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Home from './pages/Home'
@@ -10,12 +10,16 @@ import Profile from './pages/Profile'
 import Favorites from './pages/Favorites'
 import Cart from './pages/Cart'
 import Tests from './pages/Tests'
+import TestDetail from './pages/TestDetail'
+import TestEdit from './pages/TestEdit'
 import AuthModal from './components/AuthModal'
 import { clearSession, loadStoredUser, User } from './api/auth'
 
 const App: React.FC = () => {
+  const location = useLocation()
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const isFullWidthPage = location.pathname === '/' || location.pathname === '/services'
 
   // Восстановить сессию после обновления страницы
   useEffect(() => {
@@ -28,14 +32,14 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 text-gray-900">
+    <div className="flex min-h-screen flex-col bg-[#f5f8fa] text-slate-900">
       <Header
         user={user}
         onLoginClick={() => setIsAuthModalOpen(true)}
         onLogout={handleLogout}
       />
 
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <main className={isFullWidthPage ? 'flex-grow' : 'site-container flex-grow py-8'}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -44,10 +48,24 @@ const App: React.FC = () => {
             path="/tests"
             element={<Tests user={user} onLoginClick={() => setIsAuthModalOpen(true)} />}
           />
+          <Route
+            path="/tests/:id/edit"
+            element={<TestEdit user={user} onLoginClick={() => setIsAuthModalOpen(true)} />}
+          />
+          <Route
+            path="/tests/:id"
+            element={<TestDetail user={user} onLoginClick={() => setIsAuthModalOpen(true)} />}
+          />
           <Route path="/registration" element={<Registration onAuth={setUser} />} />
           <Route
             path="/profile"
-            element={<Profile user={user} onLogout={handleLogout} />}
+            element={
+              <Profile
+                user={user}
+                onLogout={handleLogout}
+                onUserUpdate={setUser}
+              />
+            }
           />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/cart" element={<Cart />} />

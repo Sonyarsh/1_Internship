@@ -6,17 +6,24 @@ from sqlalchemy import inspect
 from database import engine, Base
 from auth_router import router as auth_router
 from routers import router as concrete_router
+from contact_router import router as contact_router
 import user_model  # таблица users
 import models  # таблица concrete_strengths
+import contact_model  # таблица contact_requests
 
 
 def ensure_tables():
-    """Создаёт таблицы. Если concrete_strengths устарела — пересоздаёт только её (users не трогаем)."""
+    """Создаёт таблицы и добавляет user_id, если колонки ещё нет."""
     insp = inspect(engine)
     if "concrete_strengths" in insp.get_table_names():
         column_names = {col["name"] for col in insp.get_columns("concrete_strengths")}
         if "applicant_info" not in column_names:
             models.ConcreteStrength.__table__.drop(bind=engine)
+        elif "user_id" not in column_names:
+            with engine.begin() as conn:
+                conn.exec_driver_sql(
+                    "ALTER TABLE concrete_strengths ADD COLUMN user_id INTEGER"
+                )
     Base.metadata.create_all(bind=engine)
 
 
@@ -44,6 +51,11 @@ app.include_router(
     concrete_router,
     prefix="/concrete_strength",
     tags=["Concrete Strength"],
+)
+app.include_router(
+    contact_router,
+    prefix="/contact_requests",
+    tags=["Contact Requests"],
 )
 
 

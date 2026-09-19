@@ -34,3 +34,16 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserResponse
+
+
+class UserUpdate(BaseModel):
+    """Обновление профиля (имя)."""
+
+    name: str = Field(..., min_length=1, max_length=100)
+
+
+class PasswordChange(BaseModel):
+    """Смена пароля."""
+
+    current_password: str = Field(..., min_length=6, max_length=128)
+    new_password: str = Field(..., min_length=6, max_length=128)
