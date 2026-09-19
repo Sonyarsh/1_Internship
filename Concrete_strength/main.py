@@ -11,12 +11,17 @@ import models  # таблица concrete_strengths
 
 
 def ensure_tables():
-    """Создаёт таблицы. Если concrete_strengths устарела — пересоздаёт только её (users не трогаем)."""
+    """Создаёт таблицы и добавляет user_id, если колонки ещё нет."""
     insp = inspect(engine)
     if "concrete_strengths" in insp.get_table_names():
         column_names = {col["name"] for col in insp.get_columns("concrete_strengths")}
         if "applicant_info" not in column_names:
             models.ConcreteStrength.__table__.drop(bind=engine)
+        elif "user_id" not in column_names:
+            with engine.begin() as conn:
+                conn.exec_driver_sql(
+                    "ALTER TABLE concrete_strengths ADD COLUMN user_id INTEGER"
+                )
     Base.metadata.create_all(bind=engine)
 
 

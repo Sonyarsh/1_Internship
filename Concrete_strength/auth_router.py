@@ -7,7 +7,14 @@ import jwt
 
 from database import get_session
 from user_model import User
-from auth_schemas import UserCreate, UserResponse, UserLogin, TokenResponse
+from auth_schemas import (
+    UserCreate,
+    UserResponse,
+    UserLogin,
+    TokenResponse,
+    UserUpdate,
+    PasswordChange,
+)
 from deps import SECRET_KEY, ALGORITHM, get_current_user
 
 router = APIRouter()
@@ -85,3 +92,45 @@ def login(data: UserLogin, db: Session = Depends(get_session)):
 )
 def me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.patch(
+    "/me",
+    response_model=UserResponse,
+    summary="Обновить имя профиля",
+)
+def update_me(
+    data: UserUpdate,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    current_user.name = data.name
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+
+@router.post(
+    "/change-password",
+    summary="Сменить пароль",
+)
+def change_password(
+    data: PasswordChange,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    if not verify_password(data.current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Неверный текущий пароль",
+        )
+    if data.current_password == data.new_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Новый пароль должен отличаться от текущего",
+        )
+    current_user.hashed_password = hash_password(data.new_password)
+    db.add(current_user)
+    db.commit()
+    return {"detail": "Пароль успешно изменён"}

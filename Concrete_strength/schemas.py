@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 
 
@@ -41,7 +41,7 @@ class ConcreteStrengthCreate(BaseModel):
                     "loading_speed": 0.6,
                     "loading_time": 60,
                     "max_force_f": 300,
-                    "scale_factor_alpha": 1,
+                    "scale_factor_alpha": 1.00,
                     "visual_inspection_broken": "норма",
                     "destruction_scheme": "A",
                 }
@@ -89,14 +89,25 @@ class ConcreteStrengthCreate(BaseModel):
     loading_speed: float = Field(..., ge=0)
     loading_time: float = Field(..., ge=0)
     max_force_f: float = Field(..., ge=0)
-    scale_factor_alpha: float = Field(1.0, gt=0)
+    scale_factor_alpha: float = Field(
+        1.00,
+        gt=0,
+        description="Коэффициент α, ровно 2 знака после запятой",
+        examples=[1.00, 1.05, 0.95],
+    )
 
     visual_inspection_broken: Optional[str] = None
     destruction_scheme: Optional[str] = None
 
+    @field_validator("scale_factor_alpha")
+    @classmethod
+    def round_alpha_two_decimals(cls, v: float) -> float:
+        return round(float(v), 2)
+
 
 class ConcreteStrengthResponse(BaseModel):
     id: int
+    user_id: Optional[int] = None
     applicant_info: str
     manufacturer_info: str
     product_id: str

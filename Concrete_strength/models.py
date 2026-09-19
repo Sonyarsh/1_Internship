@@ -7,6 +7,7 @@ class ConcreteStrength(Base):
     __table_args__ = {"extend_existing": True}
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=True, index=True)  # автор записи
 
     # Информация о проекте
     applicant_info = Column(String(100), nullable=False)
