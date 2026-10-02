@@ -12,6 +12,7 @@ import Cart from './pages/Cart'
 import Tests from './pages/Tests'
 import TestDetail from './pages/TestDetail'
 import TestEdit from './pages/TestEdit'
+import ContactRequests from './pages/ContactRequests'
 import AuthModal from './components/AuthModal'
 import { clearSession, loadStoredUser, User } from './api/auth'
 
@@ -64,6 +65,15 @@ const App: React.FC = () => {
                 user={user}
                 onLogout={handleLogout}
                 onUserUpdate={setUser}
+              />
+            }
+          />
+          <Route
+            path="/contact-requests"
+            element={
+              <ContactRequests
+                user={user}
+                onLoginClick={() => setIsAuthModalOpen(true)}
               />
             }
           />

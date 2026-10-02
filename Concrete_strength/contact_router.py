@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from database import get_session
+from deps import require_admin
+from user_model import User
 from contact_model import ContactRequest
 from contact_schemas import ContactRequestCreate, ContactRequestResponse
 
@@ -32,8 +34,11 @@ def create_contact_request(
 
 
 @router.get("/", response_model=list[ContactRequestResponse])
-def list_contact_requests(db: Session = Depends(get_session)):
-    """Список заявок (для проверки в Swagger / учебной админки)."""
+def list_contact_requests(
+    db: Session = Depends(get_session),
+    _admin: User = Depends(require_admin),
+):
+    """Список заявок — только для администратора."""
     return (
         db.query(ContactRequest)
         .order_by(ContactRequest.created_at.desc())

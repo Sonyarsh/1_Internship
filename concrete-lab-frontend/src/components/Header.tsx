@@ -31,6 +31,11 @@ const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogout }) => {
           <Link to="/tests" className="transition-colors hover:text-primary">Испытания</Link>
           <Link to="/about" className="transition-colors hover:text-primary">О лаборатории</Link>
           <a href="#contacts" className="transition-colors hover:text-primary">Контакты</a>
+          {user?.role === 'admin' && (
+            <Link to="/contact-requests" className="transition-colors hover:text-primary">
+              Заявки
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
