@@ -20,11 +20,19 @@ def get_current_user(
     db: Session = Depends(get_session),
 ) -> User:
     """Без валидного Bearer-токена запрос получит 401."""
-    token = credentials.credentials
+    token = credentials.credentials.strip()
+    if token.lower().startswith("bearer "):
+        token = token[7:].strip()
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = int(payload.get("sub", 0))
-    except (jwt.PyJWTError, ValueError, TypeError):
+        # verify_sub=False: старые токены хранили id числом, PyJWT 2.10+ иначе их отклоняет
+        payload = jwt.decode(
+            token,
+            SECRET_KEY,
+            algorithms=[ALGORITHM],
+            options={"verify_sub": False},
+        )
+        user_id = int(payload["sub"])
+    except (jwt.PyJWTError, ValueError, TypeError, KeyError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Неверный или просроченный токен",

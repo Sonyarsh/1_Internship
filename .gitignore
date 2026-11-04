@@ -5,6 +5,10 @@
 *.pyo
 *.db
 
+# Secrets
+.env
+**/.env
+
 # Node / Vite
 node_modules/
 concrete-lab-frontend/node_modules/

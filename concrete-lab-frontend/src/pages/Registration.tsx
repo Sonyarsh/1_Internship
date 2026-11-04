@@ -3,9 +3,14 @@ import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { CheckCircle2, FlaskConical } from 'lucide-react'
 import { loginUser, registerUser, saveSession, User } from '../api/auth'
+import { COUNTRY_CODES, findCountry } from '../phone'
 
 interface RegistrationProps {
   onAuth: (user: User) => void
+}
+
+const blockClipboard = (e: React.ClipboardEvent | React.DragEvent) => {
+  e.preventDefault()
 }
 
 const Registration: React.FC<RegistrationProps> = ({ onAuth }) => {
@@ -13,14 +18,24 @@ const Registration: React.FC<RegistrationProps> = ({ onAuth }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    countryCode: '+375',
+    phoneLocal: '',
     password: '',
     confirmPassword: '',
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+  const selectedCountry = findCountry(formData.countryCode)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    if (name === 'phoneLocal') {
+      // только цифры
+      setFormData({ ...formData, phoneLocal: value.replace(/\D/g, '') })
+      return
+    }
+    setFormData({ ...formData, [name]: value })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,16 +50,21 @@ const Registration: React.FC<RegistrationProps> = ({ onAuth }) => {
       setError('Пароль должен быть не короче 6 символов')
       return
     }
+    if (formData.phoneLocal.length < 7) {
+      setError('Введите номер телефона без кода страны')
+      return
+    }
+
+    const phone = `${formData.countryCode}${formData.phoneLocal}`
 
     setLoading(true)
     try {
-      // 1) Создать пользователя
       await registerUser({
         name: formData.name,
         email: formData.email,
+        phone,
         password: formData.password,
       })
-      // 2) Сразу войти, чтобы получить токен
       const result = await loginUser({
         email: formData.email,
         password: formData.password,
@@ -55,7 +75,16 @@ const Registration: React.FC<RegistrationProps> = ({ onAuth }) => {
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const detail = err.response?.data?.detail
-        setError(typeof detail === 'string' ? detail : 'Ошибка регистрации')
+        if (typeof detail === 'string') {
+          setError(detail)
+        } else if (Array.isArray(detail)) {
+          setError(
+            detail.map((d: { msg?: string }) => d.msg).filter(Boolean).join('; ') ||
+              'Ошибка регистрации'
+          )
+        } else {
+          setError('Ошибка регистрации')
+        }
       } else {
         setError('Не удалось зарегистрироваться. Проверьте, что API запущен.')
       }
@@ -88,7 +117,7 @@ const Registration: React.FC<RegistrationProps> = ({ onAuth }) => {
         <span className="section-eyebrow">Регистрация</span>
         <h2 className="mt-2 text-3xl font-black text-navy">Новый пользователь</h2>
         <p className="mt-2 text-sm text-slate-500">Все поля обязательны для заполнения.</p>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
           <div className="pt-4">
             <label className="lab-label">Имя</label>
             <input
@@ -114,16 +143,52 @@ const Registration: React.FC<RegistrationProps> = ({ onAuth }) => {
             />
           </div>
           <div>
+            <label className="lab-label">Телефон</label>
+            <div className="flex gap-2">
+              <select
+                name="countryCode"
+                value={formData.countryCode}
+                onChange={handleChange}
+                className="lab-input w-[9.5rem] shrink-0"
+                aria-label="Код страны"
+              >
+                {COUNTRY_CODES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="tel"
+                name="phoneLocal"
+                value={formData.phoneLocal}
+                onChange={handleChange}
+                className="lab-input min-w-0 flex-1"
+                placeholder={selectedCountry.placeholder}
+                inputMode="numeric"
+                required
+                minLength={7}
+                maxLength={selectedCountry.digits + 2}
+              />
+            </div>
+            <p className="mt-1 text-xs text-slate-400">
+              Выберите страну (по умолчанию BY +375) и введите номер без кода.
+            </p>
+          </div>
+          <div>
             <label className="lab-label">Пароль</label>
             <input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
+              onCopy={blockClipboard}
+              onCut={blockClipboard}
               className="lab-input"
               placeholder="минимум 6 символов"
               required
               minLength={6}
+              autoComplete="new-password"
             />
           </div>
           <div>
@@ -133,20 +198,28 @@ const Registration: React.FC<RegistrationProps> = ({ onAuth }) => {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
+              onPaste={blockClipboard}
+              onDrop={blockClipboard}
+              onCopy={blockClipboard}
+              onCut={blockClipboard}
               className="lab-input"
-              placeholder="••••••••"
+              placeholder="введите пароль ещё раз вручную"
               required
               minLength={6}
+              autoComplete="new-password"
             />
+            <p className="mt-1 text-xs text-slate-400">
+              Вставку пароля сюда отключили — наберите повторно с клавиатуры.
+            </p>
           </div>
 
-          {error && <p className="border-l-4 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+          {error && (
+            <p className="border-l-4 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {error}
+            </p>
+          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="lab-button-primary w-full"
-          >
+          <button type="submit" disabled={loading} className="lab-button-primary w-full">
             {loading ? 'Регистрация...' : 'Зарегистрироваться'}
           </button>
         </form>

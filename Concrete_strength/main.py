@@ -13,9 +13,11 @@ import contact_model  # таблица contact_requests
 
 
 def ensure_tables():
-    """Создаёт таблицы и добавляет user_id, если колонки ещё нет."""
+    """Создаёт таблицы и добавляет недостающие колонки."""
     insp = inspect(engine)
-    if "concrete_strengths" in insp.get_table_names():
+    tables = insp.get_table_names()
+
+    if "concrete_strengths" in tables:
         column_names = {col["name"] for col in insp.get_columns("concrete_strengths")}
         if "applicant_info" not in column_names:
             models.ConcreteStrength.__table__.drop(bind=engine)
@@ -24,6 +26,15 @@ def ensure_tables():
                 conn.exec_driver_sql(
                     "ALTER TABLE concrete_strengths ADD COLUMN user_id INTEGER"
                 )
+
+    if "users" in tables:
+        user_columns = {col["name"] for col in insp.get_columns("users")}
+        if "phone" not in user_columns:
+            with engine.begin() as conn:
+                conn.exec_driver_sql(
+                    "ALTER TABLE users ADD COLUMN phone VARCHAR(30)"
+                )
+
     Base.metadata.create_all(bind=engine)
 
 

@@ -5,11 +5,12 @@ import { loginUser, saveSession, User } from '../api/auth'
 import axios from 'axios'
 
 interface AuthModalProps {
+  notice?: string
   onClose: () => void
   onLogin: (user: User) => void
 }
 
-const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
+const AuthModal: React.FC<AuthModalProps> = ({ notice, onClose, onLogin }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -71,6 +72,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose, onLogin }) => {
           <p className="mb-7 mt-4 text-sm leading-relaxed text-slate-500">
             Авторизуйтесь, чтобы открыть свои испытания и протоколы.
           </p>
+
+          {notice && (
+            <p className="mb-4 border-l-4 border-amber-500 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              {notice}
+            </p>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

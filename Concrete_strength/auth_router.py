@@ -19,7 +19,7 @@ from deps import SECRET_KEY, ALGORITHM, get_current_user
 
 router = APIRouter()
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 часа
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 дней
 
 
 def hash_password(password: str) -> str:
@@ -56,6 +56,7 @@ def register(data: UserCreate, db: Session = Depends(get_session)):
     user = User(
         name=data.name,
         email=data.email,
+        phone=data.phone,
         hashed_password=hash_password(data.password),
         role="user",
     )
@@ -97,7 +98,7 @@ def me(current_user: User = Depends(get_current_user)):
 @router.patch(
     "/me",
     response_model=UserResponse,
-    summary="Обновить имя профиля",
+    summary="Обновить имя и телефон профиля",
 )
 def update_me(
     data: UserUpdate,
@@ -105,6 +106,8 @@ def update_me(
     current_user: User = Depends(get_current_user),
 ):
     current_user.name = data.name
+    if "phone" in data.model_fields_set:
+        current_user.phone = data.phone
     db.add(current_user)
     db.commit()
     db.refresh(current_user)

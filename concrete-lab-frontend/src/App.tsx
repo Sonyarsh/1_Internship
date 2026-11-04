@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
+import axios from 'axios'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import Home from './pages/Home'
@@ -14,17 +15,52 @@ import TestDetail from './pages/TestDetail'
 import TestEdit from './pages/TestEdit'
 import ContactRequests from './pages/ContactRequests'
 import AuthModal from './components/AuthModal'
-import { clearSession, loadStoredUser, User } from './api/auth'
+import { AUTH_EXPIRED_EVENT, clearSession, fetchMe, getToken, loadStoredUser, saveUser, User } from './api/auth'
 
 const App: React.FC = () => {
   const location = useLocation()
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [authNotice, setAuthNotice] = useState('')
   const [user, setUser] = useState<User | null>(null)
   const isFullWidthPage = location.pathname === '/' || location.pathname === '/services'
 
-  // Восстановить сессию после обновления страницы
+  const openLogin = (notice = '') => {
+    setAuthNotice(notice)
+    setIsAuthModalOpen(true)
+  }
+
+  // Восстановить сессию после обновления страницы. Просроченный токен сразу сбрасываем.
   useEffect(() => {
-    setUser(loadStoredUser())
+    const token = getToken()
+    const stored = loadStoredUser()
+    if (!token || !stored) {
+      if (token || localStorage.getItem('user')) {
+        clearSession()
+        openLogin('Сессия истекла. Войдите снова.')
+      }
+      setUser(null)
+      return
+    }
+    setUser(stored)
+    fetchMe()
+      .then((me) => {
+        saveUser(me)
+        setUser(me)
+      })
+      .catch((err: unknown) => {
+        if (!axios.isAxiosError(err) || err.response?.status === 401) {
+          setUser(null)
+        }
+      })
+  }, [])
+
+  useEffect(() => {
+    const onExpired = () => {
+      setUser(null)
+      openLogin('Сессия истекла. Войдите снова.')
+    }
+    window.addEventListener(AUTH_EXPIRED_EVENT, onExpired)
+    return () => window.removeEventListener(AUTH_EXPIRED_EVENT, onExpired)
   }, [])
 
   const handleLogout = () => {
@@ -36,7 +72,7 @@ const App: React.FC = () => {
     <div className="flex min-h-screen flex-col bg-[#f5f8fa] text-slate-900">
       <Header
         user={user}
-        onLoginClick={() => setIsAuthModalOpen(true)}
+        onLoginClick={() => openLogin()}
         onLogout={handleLogout}
       />
 
@@ -47,15 +83,15 @@ const App: React.FC = () => {
           <Route path="/services" element={<Services userRole={user?.role} />} />
           <Route
             path="/tests"
-            element={<Tests user={user} onLoginClick={() => setIsAuthModalOpen(true)} />}
+            element={<Tests user={user} onLoginClick={() => openLogin()} />}
           />
           <Route
             path="/tests/:id/edit"
-            element={<TestEdit user={user} onLoginClick={() => setIsAuthModalOpen(true)} />}
+            element={<TestEdit user={user} onLoginClick={() => openLogin()} />}
           />
           <Route
             path="/tests/:id"
-            element={<TestDetail user={user} onLoginClick={() => setIsAuthModalOpen(true)} />}
+            element={<TestDetail user={user} onLoginClick={() => openLogin()} />}
           />
           <Route path="/registration" element={<Registration onAuth={setUser} />} />
           <Route
@@ -73,7 +109,7 @@ const App: React.FC = () => {
             element={
               <ContactRequests
                 user={user}
-                onLoginClick={() => setIsAuthModalOpen(true)}
+                onLoginClick={openLogin}
               />
             }
           />
@@ -86,8 +122,13 @@ const App: React.FC = () => {
 
       {isAuthModalOpen && (
         <AuthModal
-          onClose={() => setIsAuthModalOpen(false)}
+          notice={authNotice}
+          onClose={() => {
+            setAuthNotice('')
+            setIsAuthModalOpen(false)
+          }}
           onLogin={(userData) => {
+            setAuthNotice('')
             setUser(userData)
             setIsAuthModalOpen(false)
           }}

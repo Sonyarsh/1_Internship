@@ -11,6 +11,7 @@ import {
   updateProfile,
 } from '../api/auth'
 import { fetchRecords, type ConcreteStrengthRecord } from '../api/concrete'
+import { COUNTRY_CODES, findCountry, splitPhone } from '../phone'
 
 type Tab = 'profile' | 'orders' | 'settings'
 
@@ -23,7 +24,10 @@ interface ProfileProps {
 const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
   const [tab, setTab] = useState<Tab>('profile')
 
+  const initialPhone = splitPhone(user?.phone)
   const [name, setName] = useState(user?.name ?? '')
+  const [countryCode, setCountryCode] = useState(initialPhone.code)
+  const [phoneLocal, setPhoneLocal] = useState(initialPhone.local)
   const [nameMsg, setNameMsg] = useState('')
   const [nameError, setNameError] = useState('')
   const [nameLoading, setNameLoading] = useState(false)
@@ -40,7 +44,11 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
   const [ordersError, setOrdersError] = useState('')
 
   useEffect(() => {
-    if (user) setName(user.name)
+    if (!user) return
+    const parsed = splitPhone(user.phone)
+    setName(user.name)
+    setCountryCode(parsed.code)
+    setPhoneLocal(parsed.local)
   }, [user])
 
   useEffect(() => {
@@ -96,22 +104,43 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
     )
   }
 
+  const selectedCountry = findCountry(countryCode)
+
   const handleSaveName = async (e: React.FormEvent) => {
     e.preventDefault()
     setNameMsg('')
     setNameError('')
+    const digits = phoneLocal.replace(/\D/g, '')
+    if (digits.length > 0 && digits.length < 7) {
+      setNameError('Введите номер телефона без кода страны или очистите поле')
+      return
+    }
     setNameLoading(true)
     try {
-      const updated = await updateProfile(name.trim())
+      const updated = await updateProfile({
+        name: name.trim(),
+        phone: digits ? `${countryCode}${digits}` : null,
+      })
       const token = getToken()
       if (token) saveSession(token, updated)
       else saveUser(updated)
       onUserUpdate(updated)
-      setNameMsg('Имя сохранено')
+      setNameMsg('Данные сохранены')
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const detail = err.response?.data?.detail
-        setNameError(typeof detail === 'string' ? detail : 'Не удалось сохранить имя')
+        if (typeof detail === 'string') {
+          setNameError(detail)
+        } else if (Array.isArray(detail)) {
+          setNameError(
+            detail
+              .map((d: { msg?: string }) => d.msg)
+              .filter(Boolean)
+              .join('; ') || 'Не удалось сохранить данные'
+          )
+        } else {
+          setNameError('Не удалось сохранить данные')
+        }
       } else {
         setNameError('Ошибка сети')
       }
@@ -202,6 +231,12 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
                 </div>
                 <div className="bg-[#f3f7f9] p-4">
                   <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Телефон
+                  </label>
+                  <p className="font-semibold text-navy">{user.phone || '—'}</p>
+                </div>
+                <div className="bg-[#f3f7f9] p-4">
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-500">
                     ID пользователя
                   </label>
                   <p className="font-semibold text-navy">{user.id}</p>
@@ -220,10 +255,39 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
                     className="lab-input"
                   />
                 </label>
+                <div className="block text-sm">
+                  <span className="lab-label">Телефон</span>
+                  <div className="flex gap-2">
+                    <select
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      className="lab-input w-[9.5rem] shrink-0"
+                      aria-label="Код страны"
+                    >
+                      {COUNTRY_CODES.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="tel"
+                      value={phoneLocal}
+                      onChange={(e) => setPhoneLocal(e.target.value.replace(/\D/g, ''))}
+                      className="lab-input min-w-0 flex-1"
+                      placeholder={selectedCountry.placeholder}
+                      inputMode="numeric"
+                      maxLength={selectedCountry.digits + 2}
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-slate-400">
+                    Номер без кода страны. Пустое поле убирает телефон из профиля.
+                  </p>
+                </div>
                 {nameError && <p className="text-sm text-red-600">{nameError}</p>}
                 {nameMsg && <p className="text-sm text-green-700">{nameMsg}</p>}
                 <button type="submit" disabled={nameLoading} className="lab-button-primary">
-                  {nameLoading ? 'Сохранение...' : 'Сохранить имя'}
+                  {nameLoading ? 'Сохранение...' : 'Сохранить'}
                 </button>
               </form>
             </div>

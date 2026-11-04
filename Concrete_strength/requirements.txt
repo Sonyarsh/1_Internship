@@ -5,3 +5,5 @@ pydantic[email]
 bcrypt
 PyJWT
 python-multipart
+psycopg2-binary
+python-dotenv
