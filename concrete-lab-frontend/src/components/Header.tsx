@@ -29,6 +29,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogout }) => {
         <nav className="hidden items-center gap-7 text-sm font-bold text-navy lg:flex">
           <Link to="/services" className="transition-colors hover:text-primary">Услуги</Link>
           <Link to="/tests" className="transition-colors hover:text-primary">Испытания</Link>
+          <Link to="/frost" className="transition-colors hover:text-primary">Морозостойкость</Link>
           <Link to="/about" className="transition-colors hover:text-primary">О лаборатории</Link>
           <a href="#contacts" className="transition-colors hover:text-primary">Контакты</a>
           {user?.role === 'admin' && (

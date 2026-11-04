@@ -14,6 +14,8 @@ import Tests from './pages/Tests'
 import TestDetail from './pages/TestDetail'
 import TestEdit from './pages/TestEdit'
 import ContactRequests from './pages/ContactRequests'
+import Frost from './pages/Frost'
+import FrostDetail from './pages/FrostDetail'
 import AuthModal from './components/AuthModal'
 import { AUTH_EXPIRED_EVENT, clearSession, fetchMe, getToken, loadStoredUser, saveUser, User } from './api/auth'
 
@@ -92,6 +94,14 @@ const App: React.FC = () => {
           <Route
             path="/tests/:id"
             element={<TestDetail user={user} onLoginClick={() => openLogin()} />}
+          />
+          <Route
+            path="/frost"
+            element={<Frost user={user} onLoginClick={() => openLogin()} />}
+          />
+          <Route
+            path="/frost/:id"
+            element={<FrostDetail user={user} onLoginClick={() => openLogin()} />}
           />
           <Route path="/registration" element={<Registration onAuth={setUser} />} />
           <Route

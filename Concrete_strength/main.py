@@ -7,9 +7,11 @@ from database import engine, Base
 from auth_router import router as auth_router
 from routers import router as concrete_router
 from contact_router import router as contact_router
+from frost_router import router as frost_router
 import user_model  # таблица users
 import models  # таблица concrete_strengths
 import contact_model  # таблица contact_requests
+import frost_model  # таблица frost_tests
 
 
 def ensure_tables():
@@ -67,6 +69,11 @@ app.include_router(
     contact_router,
     prefix="/contact_requests",
     tags=["Contact Requests"],
+)
+app.include_router(
+    frost_router,
+    prefix="/frost_resistance",
+    tags=["Frost Resistance"],
 )
 
 
