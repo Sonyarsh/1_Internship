@@ -158,7 +158,10 @@ const Tests: React.FC<TestsProps> = ({ user, onLoginClick }) => {
   return (
     <div className="mx-auto max-w-5xl space-y-10 py-8">
       <div>
-        <span className="section-eyebrow">Новый протокол</span>
+        <Link to="/tests" className="text-sm font-bold text-primary hover:underline">
+          ← Все испытания
+        </Link>
+        <span className="section-eyebrow mt-5">Новый протокол</span>
         <h1 className="section-title">Испытание бетона на сжатие</h1>
         <p className="mt-3 text-slate-600">
           Заполните протокол. Средние размеры и прочность fc посчитает сервер.
@@ -275,7 +278,7 @@ const Tests: React.FC<TestsProps> = ({ user, onLoginClick }) => {
                     </td>
                     <td className="px-4 py-3">
                       <Link
-                        to={`/tests/${r.id}`}
+                        to={`/tests/compression/${r.id}`}
                         className="font-bold text-primary hover:underline"
                       >
                         Открыть

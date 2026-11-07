@@ -4,7 +4,7 @@ import { FlaskConical, Mail, MapPin, Phone } from 'lucide-react'
 
 const Footer: React.FC = () => {
   return (
-    <footer id="contacts" className="bg-navy text-white">
+    <footer className="bg-navy text-white">
       <div className="site-container py-16">
         <div className="grid gap-10 md:grid-cols-[1.2fr_.7fr_1.1fr]">
           <div>

@@ -48,7 +48,7 @@ const TestDetail: React.FC<TestDetailProps> = ({ user, onLoginClick }) => {
     setError('')
     try {
       await deleteRecord(record.id)
-      navigate('/tests')
+      navigate('/tests/compression')
     } catch {
       setError('Не удалось удалить запись')
       setDeleting(false)
@@ -78,7 +78,7 @@ const TestDetail: React.FC<TestDetailProps> = ({ user, onLoginClick }) => {
     return (
       <div className="py-12 space-y-4">
         <p className="text-red-600">{error}</p>
-        <Link to="/tests" className="text-primary hover:underline">
+        <Link to="/tests/compression" className="text-primary hover:underline">
           ← К списку испытаний
         </Link>
       </div>
@@ -94,7 +94,7 @@ const TestDetail: React.FC<TestDetailProps> = ({ user, onLoginClick }) => {
     <div className="mx-auto max-w-4xl space-y-6 py-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <Link to="/tests" className="text-sm font-bold text-primary hover:underline">
+          <Link to="/tests/compression" className="text-sm font-bold text-primary hover:underline">
             ← К списку
           </Link>
           <span className="section-eyebrow mt-5">Результат испытания</span>
@@ -102,7 +102,7 @@ const TestDetail: React.FC<TestDetailProps> = ({ user, onLoginClick }) => {
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
-            to={`/tests/${record.id}/edit`}
+            to={`/tests/compression/${record.id}/edit`}
             className="lab-button-primary"
           >
             Редактировать

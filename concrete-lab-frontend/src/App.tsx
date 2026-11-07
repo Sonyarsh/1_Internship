@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Navigate, Routes, Route, useLocation, useParams } from 'react-router-dom'
 import axios from 'axios'
 import Header from './components/Header'
 import Footer from './components/Footer'
@@ -10,6 +10,7 @@ import Registration from './pages/Registration'
 import Profile from './pages/Profile'
 import Favorites from './pages/Favorites'
 import Cart from './pages/Cart'
+import TestsHub from './pages/TestsHub'
 import Tests from './pages/Tests'
 import TestDetail from './pages/TestDetail'
 import TestEdit from './pages/TestEdit'
@@ -18,6 +19,12 @@ import Frost from './pages/Frost'
 import FrostDetail from './pages/FrostDetail'
 import AuthModal from './components/AuthModal'
 import { AUTH_EXPIRED_EVENT, clearSession, fetchMe, getToken, loadStoredUser, saveUser, User } from './api/auth'
+
+/** Старый адрес /frost/:id → /tests/frost/:id */
+const LegacyFrostDetailRedirect: React.FC = () => {
+  const { id } = useParams()
+  return <Navigate to={`/tests/frost/${id}`} replace />
+}
 
 const App: React.FC = () => {
   const location = useLocation()
@@ -70,6 +77,16 @@ const App: React.FC = () => {
     setUser(null)
   }
 
+  // Прокрутка к якорю после перехода (например /#contacts)
+  useEffect(() => {
+    if (!location.hash) return
+    const id = location.hash.replace('#', '')
+    const timer = window.setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+    return () => window.clearTimeout(timer)
+  }, [location.pathname, location.hash])
+
   return (
     <div className="flex min-h-screen flex-col bg-[#f5f8fa] text-slate-900">
       <Header
@@ -83,26 +100,30 @@ const App: React.FC = () => {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/services" element={<Services userRole={user?.role} />} />
+          <Route path="/tests" element={<TestsHub />} />
           <Route
-            path="/tests"
+            path="/tests/compression"
             element={<Tests user={user} onLoginClick={() => openLogin()} />}
           />
           <Route
-            path="/tests/:id/edit"
+            path="/tests/compression/:id/edit"
             element={<TestEdit user={user} onLoginClick={() => openLogin()} />}
           />
           <Route
-            path="/tests/:id"
+            path="/tests/compression/:id"
             element={<TestDetail user={user} onLoginClick={() => openLogin()} />}
           />
           <Route
-            path="/frost"
+            path="/tests/frost"
             element={<Frost user={user} onLoginClick={() => openLogin()} />}
           />
           <Route
-            path="/frost/:id"
+            path="/tests/frost/:id"
             element={<FrostDetail user={user} onLoginClick={() => openLogin()} />}
           />
+          {/* Старые адреса — редирект в раздел «Испытания» */}
+          <Route path="/frost" element={<Navigate to="/tests/frost" replace />} />
+          <Route path="/frost/:id" element={<LegacyFrostDetailRedirect />} />
           <Route path="/registration" element={<Registration onAuth={setUser} />} />
           <Route
             path="/profile"

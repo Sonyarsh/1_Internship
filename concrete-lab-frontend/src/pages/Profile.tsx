@@ -351,7 +351,7 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
                           </td>
                           <td className="px-4 py-3 text-right">
                             <Link
-                              to={`/tests/${r.id}`}
+                              to={`/tests/compression/${r.id}`}
                               className="font-bold text-primary hover:underline"
                             >
                               Открыть

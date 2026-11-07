@@ -192,7 +192,10 @@ const Frost: React.FC<FrostProps> = ({ user, onLoginClick }) => {
   return (
     <div className="mx-auto max-w-5xl space-y-10 py-8">
       <div>
-        <span className="section-eyebrow">ГОСТ 10060-2012</span>
+        <Link to="/tests" className="text-sm font-bold text-primary hover:underline">
+          ← Все испытания
+        </Link>
+        <span className="section-eyebrow mt-5">ГОСТ 10060-2012</span>
         <h1 className="section-title">Морозостойкость бетона</h1>
         <p className="mt-3 max-w-3xl text-slate-600">
           Марку F1 или F2 ставят по числу циклов, которое серия выдержала: нижняя граница
@@ -324,7 +327,7 @@ const Frost: React.FC<FrostProps> = ({ user, onLoginClick }) => {
                     <td className="px-4 py-3">{record.cycles_done}</td>
                     <td className="px-4 py-3 font-semibold">{record.achieved_mark || 'не подтверждена'}</td>
                     <td className="px-4 py-3 text-right">
-                      <Link to={`/frost/${record.id}`} className="font-bold text-primary hover:underline">Открыть</Link>
+                      <Link to={`/tests/frost/${record.id}`} className="font-bold text-primary hover:underline">Открыть</Link>
                     </td>
                   </tr>
                 ))}

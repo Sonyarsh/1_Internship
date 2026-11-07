@@ -41,7 +41,7 @@ const FrostDetail: React.FC<FrostDetailProps> = ({ user, onLoginClick }) => {
     if (!record || !window.confirm(`Удалить протокол #${record.id}?`)) return
     try {
       await deleteFrostTest(record.id)
-      navigate('/frost')
+      navigate('/tests/frost')
     } catch {
       setError('Не удалось удалить протокол')
     }
@@ -82,7 +82,7 @@ const FrostDetail: React.FC<FrostDetailProps> = ({ user, onLoginClick }) => {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 py-8">
-      <Link to="/frost" className="text-sm font-bold text-primary hover:underline">← К протоколам</Link>
+      <Link to="/tests/frost" className="text-sm font-bold text-primary hover:underline">← К протоколам</Link>
       <div>
         <span className="section-eyebrow">ГОСТ 10060-2012</span>
         <h1 className="section-title">Протокол #{record.id}</h1>

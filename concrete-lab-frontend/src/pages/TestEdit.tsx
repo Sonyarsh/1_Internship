@@ -106,7 +106,7 @@ const TestEdit: React.FC<TestEditProps> = ({ user, onLoginClick }) => {
     setSaving(true)
     try {
       await updateRecord(Number(id), form)
-      navigate(`/tests/${id}`)
+      navigate(`/tests/compression/${id}`)
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const detail = err.response?.data?.detail
@@ -145,7 +145,7 @@ const TestEdit: React.FC<TestEditProps> = ({ user, onLoginClick }) => {
     return (
       <div className="py-12 space-y-4">
         <p className="text-red-600">{error}</p>
-        <Link to="/tests" className="text-primary hover:underline">
+        <Link to="/tests/compression" className="text-primary hover:underline">
           ← К списку
         </Link>
       </div>
@@ -155,7 +155,7 @@ const TestEdit: React.FC<TestEditProps> = ({ user, onLoginClick }) => {
   return (
     <div className="mx-auto max-w-5xl space-y-6 py-8">
       <div>
-        <Link to={`/tests/${id}`} className="text-sm font-bold text-primary hover:underline">
+        <Link to={`/tests/compression/${id}`} className="text-sm font-bold text-primary hover:underline">
           ← К протоколу
         </Link>
         <span className="section-eyebrow mt-5">Изменение данных</span>
@@ -236,7 +236,7 @@ const TestEdit: React.FC<TestEditProps> = ({ user, onLoginClick }) => {
             {saving ? 'Сохранение...' : 'Сохранить изменения'}
           </button>
           <Link
-            to={`/tests/${id}`}
+            to={`/tests/compression/${id}`}
             className="lab-button-secondary"
           >
             Отмена
