@@ -17,6 +17,8 @@ import TestEdit from './pages/TestEdit'
 import ContactRequests from './pages/ContactRequests'
 import Frost from './pages/Frost'
 import FrostDetail from './pages/FrostDetail'
+import Waterproof from './pages/Waterproof'
+import WaterproofDetail from './pages/WaterproofDetail'
 import AuthModal from './components/AuthModal'
 import { AUTH_EXPIRED_EVENT, clearSession, fetchMe, getToken, loadStoredUser, saveUser, User } from './api/auth'
 
@@ -120,6 +122,14 @@ const App: React.FC = () => {
           <Route
             path="/tests/frost/:id"
             element={<FrostDetail user={user} onLoginClick={() => openLogin()} />}
+          />
+          <Route
+            path="/tests/waterproof"
+            element={<Waterproof user={user} onLoginClick={() => openLogin()} />}
+          />
+          <Route
+            path="/tests/waterproof/:id"
+            element={<WaterproofDetail user={user} onLoginClick={() => openLogin()} />}
           />
           {/* Старые адреса — редирект в раздел «Испытания» */}
           <Route path="/frost" element={<Navigate to="/tests/frost" replace />} />

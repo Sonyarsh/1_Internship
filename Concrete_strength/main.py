@@ -8,10 +8,12 @@ from auth_router import router as auth_router
 from routers import router as concrete_router
 from contact_router import router as contact_router
 from frost_router import router as frost_router
+from waterproof_router import router as waterproof_router
 import user_model  # таблица users
 import models  # таблица concrete_strengths
 import contact_model  # таблица contact_requests
 import frost_model  # таблица frost_tests
+import waterproof_model  # таблица waterproof_tests
 
 
 def ensure_tables():
@@ -35,6 +37,19 @@ def ensure_tables():
             with engine.begin() as conn:
                 conn.exec_driver_sql(
                     "ALTER TABLE users ADD COLUMN phone VARCHAR(30)"
+                )
+
+    if "waterproof_tests" in tables:
+        wp_columns = {col["name"] for col in insp.get_columns("waterproof_tests")}
+        with engine.begin() as conn:
+            if "sample_diameters_mm" not in wp_columns:
+                conn.exec_driver_sql(
+                    "ALTER TABLE waterproof_tests ADD COLUMN sample_diameters_mm JSON"
+                )
+            # Старое одно поле диаметра больше не используется
+            if "sample_diameter_mm" in wp_columns:
+                conn.exec_driver_sql(
+                    "ALTER TABLE waterproof_tests ALTER COLUMN sample_diameter_mm DROP NOT NULL"
                 )
 
     Base.metadata.create_all(bind=engine)
@@ -74,6 +89,11 @@ app.include_router(
     frost_router,
     prefix="/frost_resistance",
     tags=["Frost Resistance"],
+)
+app.include_router(
+    waterproof_router,
+    prefix="/waterproof",
+    tags=["Waterproof (wet spot)"],
 )
 
 
