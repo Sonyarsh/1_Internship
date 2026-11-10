@@ -10,10 +10,23 @@ import {
   type User as AuthUser,
   updateProfile,
 } from '../api/auth'
-import { fetchRecords, type ConcreteStrengthRecord } from '../api/concrete'
+import { fetchRecords } from '../api/concrete'
+import { fetchFrostTests } from '../api/frost'
+import { fetchWaterproofTests } from '../api/waterproof'
+import { fetchCoreTests } from '../api/core'
 import { COUNTRY_CODES, findCountry, splitPhone } from '../phone'
 
 type Tab = 'profile' | 'orders' | 'settings'
+
+type ProfileOrder = {
+  key: string
+  id: number
+  kind: string
+  applicant: string
+  concreteClass: string
+  summary: string
+  href: string
+}
 
 interface ProfileProps {
   user: AuthUser | null
@@ -39,7 +52,7 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
   const [passError, setPassError] = useState('')
   const [passLoading, setPassLoading] = useState(false)
 
-  const [orders, setOrders] = useState<ConcreteStrengthRecord[]>([])
+  const [orders, setOrders] = useState<ProfileOrder[]>([])
   const [ordersLoading, setOrdersLoading] = useState(false)
   const [ordersError, setOrdersError] = useState('')
 
@@ -58,8 +71,59 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
       setOrdersLoading(true)
       setOrdersError('')
       try {
-        const data = await fetchRecords()
-        if (!cancelled) setOrders(data)
+        const [compression, frost, waterproof, core] = await Promise.all([
+          fetchRecords(),
+          fetchFrostTests(),
+          fetchWaterproofTests(),
+          fetchCoreTests(),
+        ])
+        if (cancelled) return
+        const rows: ProfileOrder[] = [
+          ...compression.map((r) => ({
+            key: `compression-${r.id}`,
+            id: r.id,
+            kind: 'Сжатие (кубы)',
+            applicant: r.applicant_info,
+            concreteClass: r.concrete_class,
+            summary:
+              r.fc_cube_batch_i_sample_j_series_k != null
+                ? `fc = ${r.fc_cube_batch_i_sample_j_series_k.toFixed(2)} МПа`
+                : '—',
+            href: `/tests/compression/${r.id}`,
+          })),
+          ...frost.map((r) => ({
+            key: `frost-${r.id}`,
+            id: r.id,
+            kind: 'Морозостойкость',
+            applicant: r.applicant_info,
+            concreteClass: r.concrete_class,
+            summary: r.achieved_mark || r.conclusion || '—',
+            href: `/tests/frost/${r.id}`,
+          })),
+          ...waterproof.map((r) => ({
+            key: `waterproof-${r.id}`,
+            id: r.id,
+            kind: 'Водонепроницаемость',
+            applicant: r.applicant_info,
+            concreteClass: r.concrete_class,
+            summary: r.achieved_mark || r.conclusion || '—',
+            href: `/tests/waterproof/${r.id}`,
+          })),
+          ...core.map((r) => ({
+            key: `core-${r.id}`,
+            id: r.id,
+            kind: 'Сжатие в конструкциях',
+            applicant: r.applicant_info,
+            concreteClass: r.concrete_class,
+            summary:
+              r.series_strength_mpa != null
+                ? `Rср = ${r.series_strength_mpa} МПа`
+                : r.structure_name || '—',
+            href: `/tests/core/${r.id}`,
+          })),
+        ]
+        rows.sort((a, b) => b.id - a.id || a.kind.localeCompare(b.kind, 'ru'))
+        setOrders(rows)
       } catch (err) {
         if (!cancelled) {
           if (axios.isAxiosError(err) && err.response?.status === 401) {
@@ -330,28 +394,24 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
                     <thead className="bg-navy text-white">
                       <tr>
                         <th className="px-4 py-3 font-bold">ID</th>
+                        <th className="px-4 py-3 font-bold">Тип</th>
                         <th className="px-4 py-3 font-bold">Заявитель</th>
                         <th className="px-4 py-3 font-bold">Класс</th>
-                        <th className="px-4 py-3 font-bold">Партия</th>
-                        <th className="px-4 py-3 font-bold">fc</th>
+                        <th className="px-4 py-3 font-bold">Результат</th>
                         <th className="px-4 py-3 font-bold" />
                       </tr>
                     </thead>
                     <tbody>
                       {orders.map((r) => (
-                        <tr key={r.id} className="border-t border-slate-100 hover:bg-primary-light">
+                        <tr key={r.key} className="border-t border-slate-100 hover:bg-primary-light">
                           <td className="px-4 py-3 font-semibold text-navy">{r.id}</td>
-                          <td className="px-4 py-3">{r.applicant_info}</td>
-                          <td className="px-4 py-3">{r.concrete_class}</td>
-                          <td className="px-4 py-3">
-                            {r.batch_N}/{r.sample_N}/{r.series_N}
-                          </td>
-                          <td className="px-4 py-3">
-                            {r.fc_cube_batch_i_sample_j_series_k?.toFixed(2) ?? '—'}
-                          </td>
+                          <td className="px-4 py-3">{r.kind}</td>
+                          <td className="px-4 py-3">{r.applicant}</td>
+                          <td className="px-4 py-3">{r.concreteClass}</td>
+                          <td className="px-4 py-3">{r.summary}</td>
                           <td className="px-4 py-3 text-right">
                             <Link
-                              to={`/tests/compression/${r.id}`}
+                              to={r.href}
                               className="font-bold text-primary hover:underline"
                             >
                               Открыть

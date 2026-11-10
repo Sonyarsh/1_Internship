@@ -9,11 +9,13 @@ from routers import router as concrete_router
 from contact_router import router as contact_router
 from frost_router import router as frost_router
 from waterproof_router import router as waterproof_router
+from core_router import router as core_router
 import user_model  # таблица users
 import models  # таблица concrete_strengths
 import contact_model  # таблица contact_requests
 import frost_model  # таблица frost_tests
 import waterproof_model  # таблица waterproof_tests
+import core_model  # таблица core_strength_tests
 
 
 def ensure_tables():
@@ -94,6 +96,11 @@ app.include_router(
     waterproof_router,
     prefix="/waterproof",
     tags=["Waterproof (wet spot)"],
+)
+app.include_router(
+    core_router,
+    prefix="/core_strength",
+    tags=["Core strength GOST 28570"],
 )
 
 

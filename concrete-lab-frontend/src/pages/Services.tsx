@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { ClipboardList, Droplets, Gauge, Phone, Snowflake, Waves } from 'lucide-react'
+import { ClipboardList, Cylinder, Droplets, Gauge, Phone, Snowflake } from 'lucide-react'
 
 interface ServicesProps {
   userRole?: string
@@ -36,12 +36,12 @@ const services = [
   },
   {
     id: 4,
-    icon: Waves,
-    title: 'Неразрушающий контроль',
+    icon: Cylinder,
+    title: 'Испытание на сжатие в конструкциях',
     description:
-      'Прочность бетона в конструкциях методами ударного импульса или ультразвука.',
-    price: 'от 80 BYN',
-    norm: 'по запросу',
+      'Прочность по образцам, отобранным из изделий и конструкций (керны, выпилки).',
+    price: 'от 90 BYN',
+    norm: 'ГОСТ 28570-2019',
   },
 ]
 

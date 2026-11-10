@@ -1,11 +1,11 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Droplets, Gauge, Snowflake, Waves } from 'lucide-react'
+import { ArrowRight, Droplets, Gauge, Snowflake, Cylinder } from 'lucide-react'
 
 const items = [
   {
     title: 'Испытание на сжатие',
-    description: 'Прочность бетона по контрольным образцам-кубам. Протокол с расчётом fc.',
+    description: 'Прочность бетона по контрольным образцам-кубам (ГОСТ 10180). Протокол с расчётом fc.',
     to: '/tests/compression',
     icon: Gauge,
     available: true,
@@ -26,11 +26,12 @@ const items = [
     available: true,
   },
   {
-    title: 'Неразрушающий контроль',
-    description: 'Прочность в конструкциях методами ударного импульса или ультразвука.',
-    to: null,
-    icon: Waves,
-    available: false,
+    title: 'Испытание на сжатие в конструкциях',
+    description:
+      'Прочность по кернам и выпилкам из конструкций: R = (F/A)·α·η₁, средняя прочность серии.',
+    to: '/tests/core',
+    icon: Cylinder,
+    available: true,
   },
 ]
 
@@ -42,7 +43,7 @@ const TestsHub: React.FC = () => {
         <h1 className="section-title">Испытания</h1>
         <p className="mt-3 max-w-2xl text-slate-600">
           Здесь ведут протоколы. Прайс и описание для заказчиков — в разделе «Услуги».
-          Сжатие, морозостойкость и водонепроницаемость доступны сейчас; НК — позже.
+          Сжатие (10180 и 28570), морозостойкость и водонепроницаемость доступны сейчас.
         </p>
       </div>
 
