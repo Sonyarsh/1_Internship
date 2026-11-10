@@ -9,6 +9,9 @@
 .env
 **/.env
 
+# Notify dry-run log
+Concrete_strength/notifications.log
+
 # Node / Vite
 node_modules/
 concrete-lab-frontend/node_modules/

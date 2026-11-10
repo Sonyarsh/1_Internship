@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import { deleteRecord, fetchRecord, ConcreteStrengthRecord } from '../api/concrete'
 import { User } from '../api/auth'
+import SendResults from '../components/SendResults'
 
 interface TestDetailProps {
   user: User | null
@@ -168,6 +169,12 @@ const TestDetail: React.FC<TestDetailProps> = ({ user, onLoginClick }) => {
             <Item label="Схема разрушения" value={record.destruction_scheme || '—'} />
           </dl>
         </section>
+
+        <SendResults
+          kind="compression"
+          protocolId={record.id}
+          defaultEmail={user.email}
+        />
       </div>
     </div>
   )

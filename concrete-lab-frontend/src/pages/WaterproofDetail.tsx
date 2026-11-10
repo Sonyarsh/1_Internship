@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { deleteWaterproofTest, fetchWaterproofTest, WaterproofRecord } from '../api/waterproof'
 import { User } from '../api/auth'
+import SendResults from '../components/SendResults'
 
 interface WaterproofDetailProps {
   user: User | null
@@ -155,6 +156,11 @@ const WaterproofDetail: React.FC<WaterproofDetailProps> = ({ user, onLoginClick 
             {record.conclusion}
           </p>
         )}
+        <SendResults
+          kind="waterproof"
+          protocolId={record.id}
+          defaultEmail={user.email}
+        />
         {error && <p className="text-sm text-red-600">{error}</p>}
       </div>
     </div>

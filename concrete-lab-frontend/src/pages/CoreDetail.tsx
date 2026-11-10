@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { CoreRecord, deleteCoreTest, fetchCoreTest } from '../api/core'
 import { User } from '../api/auth'
+import SendResults from '../components/SendResults'
 
 interface CoreDetailProps {
   user: User | null
@@ -144,6 +145,7 @@ const CoreDetail: React.FC<CoreDetailProps> = ({ user, onLoginClick }) => {
             <p className="mt-2 text-sm text-navy">{record.conclusion}</p>
           )}
         </div>
+        <SendResults kind="core" protocolId={record.id} defaultEmail={user.email} />
         {error && <p className="text-sm text-red-600">{error}</p>}
       </div>
     </div>

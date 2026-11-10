@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import { deleteFrostTest, fetchFrostTest, FrostRecord } from '../api/frost'
 import { User } from '../api/auth'
+import SendResults from '../components/SendResults'
 
 interface FrostDetailProps {
   user: User | null
@@ -91,7 +92,7 @@ const FrostDetail: React.FC<FrostDetailProps> = ({ user, onLoginClick }) => {
       <p className={`border-l-4 px-4 py-3 text-sm ${record.project_mark_met ? 'border-green-600 bg-green-50 text-green-800' : 'border-amber-500 bg-amber-50 text-amber-900'}`}>
         {record.conclusion}
       </p>
-      <div className="lab-card">
+      <div className="lab-card space-y-6">
         <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {rows.map(([label, value]) => (
             <div key={label}>
@@ -100,6 +101,7 @@ const FrostDetail: React.FC<FrostDetailProps> = ({ user, onLoginClick }) => {
             </div>
           ))}
         </dl>
+        <SendResults kind="frost" protocolId={record.id} defaultEmail={user.email} />
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button type="button" onClick={handleDelete} className="text-sm font-bold text-red-600 hover:underline">

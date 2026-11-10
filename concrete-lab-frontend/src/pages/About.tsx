@@ -1,5 +1,17 @@
 import React from 'react'
-import { CheckCircle2, FlaskConical, Gauge, ShieldCheck, Users } from 'lucide-react'
+import {
+  Award,
+  CheckCircle2,
+  Download,
+  FileBadge,
+  FlaskConical,
+  Gauge,
+  ShieldCheck,
+  Users,
+} from 'lucide-react'
+
+/** Положите реальный PDF сюда: concrete-lab-frontend/public/docs/accreditation.pdf */
+const ACCREDITATION_PDF = '/docs/accreditation.pdf'
 
 const About: React.FC = () => {
   return (
@@ -36,6 +48,97 @@ const About: React.FC = () => {
               работает со своими протоколами и может открыть историю испытаний
               в личном кабинете.
             </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-y border-slate-200 bg-white py-16 md:py-20">
+        <div className="mb-10 max-w-2xl">
+          <span className="section-eyebrow">Документы</span>
+          <h2 className="section-title">Аккредитация лаборатории</h2>
+          <p className="mt-3 text-slate-600">
+            Лаборатория подтверждает компетентность в области испытаний бетона.
+            Ниже — сведения об аттестате и ссылка на электронный документ.
+          </p>
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-[1.1fr_.9fr] lg:items-stretch">
+          <article className="relative overflow-hidden border-2 border-navy/15 bg-[#f8fbfd] p-8 sm:p-10">
+            <div className="pointer-events-none absolute inset-3 border border-primary/25" />
+            <div className="relative space-y-6 text-center">
+              <div className="mx-auto grid h-14 w-14 place-items-center bg-navy text-white">
+                <Award size={28} />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">
+                  Аттестат аккредитации
+                </p>
+                <h3 className="mt-2 text-2xl font-black text-navy sm:text-3xl">
+                  BY/112 02.01.0000
+                </h3>
+              </div>
+              <p className="mx-auto max-w-md text-sm leading-relaxed text-slate-600">
+                Испытательная лаборатория «БетонЛаб» аккредитована на проведение
+                испытаний бетона: прочность на сжатие, морозостойкость,
+                водонепроницаемость, образцы из конструкций.
+              </p>
+              <dl className="mx-auto grid max-w-lg gap-3 text-left sm:grid-cols-2">
+                {[
+                  ['Область', 'Испытания бетона и ЖБИ'],
+                  ['Статус', 'Действует'],
+                  ['Выдан', '01.01.2025'],
+                  ['Действует до', '01.01.2030'],
+                ].map(([label, value]) => (
+                  <div key={label} className="border border-slate-200 bg-white px-4 py-3">
+                    <dt className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      {label}
+                    </dt>
+                    <dd className="mt-1 font-semibold text-navy">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="text-xs text-slate-400">
+                Учебный макет для проекта. Замените номер и даты на реальные.
+              </p>
+            </div>
+          </article>
+
+          <div className="flex flex-col justify-between gap-6 bg-navy p-8 text-white sm:p-10">
+            <div>
+              <FileBadge className="text-sky-300" size={32} />
+              <h3 className="mt-5 text-xl font-black">Электронный документ</h3>
+              <p className="mt-3 text-sm leading-relaxed text-sky-100">
+                Электронная копия аттестата доступна для просмотра и скачивания.
+                При необходимости замените файл{' '}
+                <code className="rounded bg-white/10 px-1.5 py-0.5 text-sky-50">
+                  public/docs/accreditation.pdf
+                </code>
+                .
+              </p>
+              <ul className="mt-5 space-y-2 text-sm text-sky-100">
+                <li className="flex gap-2">
+                  <CheckCircle2 className="mt-0.5 shrink-0 text-sky-300" size={16} />
+                  ГОСТ 10180, 10060, 12730.5, 28570
+                </li>
+                <li className="flex gap-2">
+                  <CheckCircle2 className="mt-0.5 shrink-0 text-sky-300" size={16} />
+                  Протоколы с расчётом в личном кабинете
+                </li>
+                <li className="flex gap-2">
+                  <CheckCircle2 className="mt-0.5 shrink-0 text-sky-300" size={16} />
+                  Прослеживаемость результатов
+                </li>
+              </ul>
+            </div>
+            <a
+              href={ACCREDITATION_PDF}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-white px-6 py-3 font-bold text-navy transition hover:bg-sky-100"
+            >
+              <Download size={18} />
+              Открыть сертификат (PDF)
+            </a>
           </div>
         </div>
       </section>

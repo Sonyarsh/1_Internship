@@ -10,6 +10,7 @@ from contact_router import router as contact_router
 from frost_router import router as frost_router
 from waterproof_router import router as waterproof_router
 from core_router import router as core_router
+from notify_router import router as notify_router
 import user_model  # таблица users
 import models  # таблица concrete_strengths
 import contact_model  # таблица contact_requests
@@ -101,6 +102,11 @@ app.include_router(
     core_router,
     prefix="/core_strength",
     tags=["Core strength GOST 28570"],
+)
+app.include_router(
+    notify_router,
+    prefix="/notify",
+    tags=["Notify email / Telegram"],
 )
 
 
