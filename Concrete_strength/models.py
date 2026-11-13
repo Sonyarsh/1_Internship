@@ -8,6 +8,11 @@ class ConcreteStrength(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, nullable=True, index=True)  # автор записи
+    # in_progress | completed
+    work_status = Column(String(20), nullable=False, default="in_progress")
+    # unpaid | invoiced | paid
+    payment_status = Column(String(20), nullable=False, default="unpaid")
+    service_order_id = Column(Integer, nullable=True, index=True)
 
     # Информация о проекте
     applicant_info = Column(String(100), nullable=False)

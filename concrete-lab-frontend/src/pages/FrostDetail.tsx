@@ -4,6 +4,7 @@ import axios from 'axios'
 import { deleteFrostTest, fetchFrostTest, FrostRecord } from '../api/frost'
 import { User } from '../api/auth'
 import SendResults from '../components/SendResults'
+import ProtocolOrderLink from '../components/ProtocolOrderLink'
 
 interface FrostDetailProps {
   user: User | null
@@ -23,6 +24,7 @@ const FrostDetail: React.FC<FrostDetailProps> = ({ user, onLoginClick }) => {
   const [record, setRecord] = useState<FrostRecord | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [canSend, setCanSend] = useState(false)
 
   useEffect(() => {
     if (!user || !id) {
@@ -101,7 +103,22 @@ const FrostDetail: React.FC<FrostDetailProps> = ({ user, onLoginClick }) => {
             </div>
           ))}
         </dl>
-        <SendResults kind="frost" protocolId={record.id} defaultEmail={user.email} />
+        <ProtocolOrderLink
+          kind="frost"
+          protocolId={record.id}
+          serviceOrderId={record.service_order_id}
+          user={user}
+          onChange={({ service_order_id, can_send }) => {
+            setRecord({ ...record, service_order_id })
+            setCanSend(can_send)
+          }}
+        />
+        <SendResults
+          kind="frost"
+          protocolId={record.id}
+          defaultEmail={user.email}
+          canSend={canSend}
+        />
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button type="button" onClick={handleDelete} className="text-sm font-bold text-red-600 hover:underline">

@@ -4,6 +4,7 @@ import axios from 'axios'
 import { CheckCircle2, FlaskConical } from 'lucide-react'
 import { loginUser, registerUser, saveSession, User } from '../api/auth'
 import { COUNTRY_CODES, findCountry } from '../phone'
+import PasswordInput from '../components/PasswordInput'
 
 interface RegistrationProps {
   onAuth: (user: User) => void
@@ -177,14 +178,12 @@ const Registration: React.FC<RegistrationProps> = ({ onAuth }) => {
           </div>
           <div>
             <label className="lab-label">Пароль</label>
-            <input
-              type="password"
+            <PasswordInput
               name="password"
               value={formData.password}
-              onChange={handleChange}
+              onChange={(value) => setFormData((prev) => ({ ...prev, password: value }))}
               onCopy={blockClipboard}
               onCut={blockClipboard}
-              className="lab-input"
               placeholder="минимум 6 символов"
               required
               minLength={6}
@@ -193,16 +192,16 @@ const Registration: React.FC<RegistrationProps> = ({ onAuth }) => {
           </div>
           <div>
             <label className="lab-label">Подтвердите пароль</label>
-            <input
-              type="password"
+            <PasswordInput
               name="confirmPassword"
               value={formData.confirmPassword}
-              onChange={handleChange}
+              onChange={(value) =>
+                setFormData((prev) => ({ ...prev, confirmPassword: value }))
+              }
               onPaste={blockClipboard}
               onDrop={blockClipboard}
               onCopy={blockClipboard}
               onCut={blockClipboard}
-              className="lab-input"
               placeholder="введите пароль ещё раз вручную"
               required
               minLength={6}

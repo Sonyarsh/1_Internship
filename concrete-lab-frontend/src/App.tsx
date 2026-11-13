@@ -39,7 +39,7 @@ const App: React.FC = () => {
   const isFullWidthPage = location.pathname === '/' || location.pathname === '/services'
 
   const openLogin = (notice = '') => {
-    setAuthNotice(notice)
+    setAuthNotice(typeof notice === 'string' ? notice : '')
     setIsAuthModalOpen(true)
   }
 
@@ -167,7 +167,7 @@ const App: React.FC = () => {
                 user={user}
                 onLogout={handleLogout}
                 onUserUpdate={setUser}
-                onLoginClick={openLogin}
+                onLoginClick={() => openLogin()}
               />
             }
           />

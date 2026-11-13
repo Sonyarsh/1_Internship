@@ -58,6 +58,33 @@ def ensure_tables():
                     "ALTER TABLE waterproof_tests ALTER COLUMN sample_diameter_mm DROP NOT NULL"
                 )
 
+    # Статусы протоколов + связь с заявкой на услугу
+    for table_name in (
+        "concrete_strengths",
+        "frost_tests",
+        "waterproof_tests",
+        "core_strength_tests",
+    ):
+        if table_name not in tables:
+            continue
+        cols = {col["name"] for col in insp.get_columns(table_name)}
+        with engine.begin() as conn:
+            if "work_status" not in cols:
+                conn.exec_driver_sql(
+                    f"ALTER TABLE {table_name} "
+                    "ADD COLUMN work_status VARCHAR(20) DEFAULT 'in_progress'"
+                )
+            if "payment_status" not in cols:
+                conn.exec_driver_sql(
+                    f"ALTER TABLE {table_name} "
+                    "ADD COLUMN payment_status VARCHAR(20) DEFAULT 'unpaid'"
+                )
+            if "service_order_id" not in cols:
+                conn.exec_driver_sql(
+                    f"ALTER TABLE {table_name} "
+                    "ADD COLUMN service_order_id INTEGER"
+                )
+
     Base.metadata.create_all(bind=engine)
 
 

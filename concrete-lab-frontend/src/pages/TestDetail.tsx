@@ -4,6 +4,7 @@ import axios from 'axios'
 import { deleteRecord, fetchRecord, ConcreteStrengthRecord } from '../api/concrete'
 import { User } from '../api/auth'
 import SendResults from '../components/SendResults'
+import ProtocolOrderLink from '../components/ProtocolOrderLink'
 
 interface TestDetailProps {
   user: User | null
@@ -17,6 +18,7 @@ const TestDetail: React.FC<TestDetailProps> = ({ user, onLoginClick }) => {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
+  const [canSend, setCanSend] = useState(false)
 
   useEffect(() => {
     if (!user || !id) {
@@ -170,10 +172,21 @@ const TestDetail: React.FC<TestDetailProps> = ({ user, onLoginClick }) => {
           </dl>
         </section>
 
+        <ProtocolOrderLink
+          kind="compression"
+          protocolId={record.id}
+          serviceOrderId={record.service_order_id}
+          user={user}
+          onChange={({ service_order_id, can_send }) => {
+            setRecord({ ...record, service_order_id })
+            setCanSend(can_send)
+          }}
+        />
         <SendResults
           kind="compression"
           protocolId={record.id}
           defaultEmail={user.email}
+          canSend={canSend}
         />
       </div>
     </div>

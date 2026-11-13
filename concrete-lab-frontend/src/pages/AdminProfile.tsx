@@ -39,6 +39,7 @@ import {
   updateServiceOrder,
 } from '../api/serviceOrders'
 import { COUNTRY_CODES, findCountry, splitPhone } from '../phone'
+import PasswordInput from '../components/PasswordInput'
 
 type Tab = 'dashboard' | 'users' | 'orders' | 'messages' | 'account' | 'settings'
 
@@ -612,35 +613,32 @@ const AdminProfile: React.FC<AdminProfileProps> = ({
               <form onSubmit={handleChangePassword} className="max-w-md space-y-4">
                 <label className="block text-sm">
                   <span className="lab-label">Текущий пароль</span>
-                  <input
-                    type="password"
+                  <PasswordInput
                     required
                     minLength={6}
-                    className="lab-input"
                     value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    onChange={setCurrentPassword}
+                    autoComplete="current-password"
                   />
                 </label>
                 <label className="block text-sm">
                   <span className="lab-label">Новый пароль</span>
-                  <input
-                    type="password"
+                  <PasswordInput
                     required
                     minLength={6}
-                    className="lab-input"
                     value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
+                    onChange={setNewPassword}
+                    autoComplete="new-password"
                   />
                 </label>
                 <label className="block text-sm">
                   <span className="lab-label">Повтор нового пароля</span>
-                  <input
-                    type="password"
+                  <PasswordInput
                     required
                     minLength={6}
-                    className="lab-input"
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={setConfirmPassword}
+                    autoComplete="new-password"
                   />
                 </label>
                 {passError && <p className="text-sm text-red-600">{passError}</p>}

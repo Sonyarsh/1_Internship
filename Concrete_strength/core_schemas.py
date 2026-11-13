@@ -31,6 +31,7 @@ class CoreCreate(BaseModel):
     concrete_class: str = Field(..., min_length=1, max_length=20)
     sampling_note: str | None = Field(default=None, max_length=255)
     samples: list[CoreSampleInput] = Field(..., min_length=1, max_length=20)
+    service_order_id: int | None = None
 
 
 class CoreSampleResult(BaseModel):
@@ -52,6 +53,9 @@ class CoreResponse(CoreCreate):
     series_strength_mpa: float | None = None
     samples_count: int | None = None
     conclusion: str | None = None
+    work_status: str | None = "in_progress"
+    payment_status: str | None = "unpaid"
+    service_order_id: int | None = None
 
     class Config:
         from_attributes = True

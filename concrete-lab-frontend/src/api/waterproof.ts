@@ -38,6 +38,9 @@ export type WaterproofRecord = WaterproofInput & {
   project_mark_met?: boolean | null
   samples_ok_at_series?: number | null
   conclusion?: string | null
+  work_status?: string | null
+  payment_status?: string | null
+  service_order_id?: number | null
 }
 
 function authHeaders() {

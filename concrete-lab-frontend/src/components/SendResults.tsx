@@ -12,12 +12,14 @@ type SendResultsProps = {
   kind: ProtocolKind
   protocolId: number
   defaultEmail?: string
+  canSend?: boolean
 }
 
 const SendResults: React.FC<SendResultsProps> = ({
   kind,
   protocolId,
   defaultEmail = '',
+  canSend = false,
 }) => {
   const [emailOn, setEmailOn] = useState(true)
   const [tgOn, setTgOn] = useState(true)
@@ -47,6 +49,10 @@ const SendResults: React.FC<SendResultsProps> = ({
     e.preventDefault()
     setError('')
     setSuccess('')
+    if (!canSend) {
+      setError('Отправка только для протоколов со статусами «Выполнен» и «Оплачен»')
+      return
+    }
     if (!emailOn && !tgOn) {
       setError('Включите хотя бы один канал: почту или Telegram')
       return
@@ -86,11 +92,19 @@ const SendResults: React.FC<SendResultsProps> = ({
         <h2 className="text-lg font-black text-navy">Отправить результаты</h2>
         <p className="mt-1 text-sm text-slate-500">
           Краткий протокол на email и/или в Telegram-бот.
-          {config?.dry_run
-            ? ' Сейчас включён учебный режим: сообщения пишутся в notifications.log на сервере.'
-            : null}
+          {!canSend
+            ? ' Сначала привяжите заявку и дождитесь статусов «Выполнена» + «Оплачено».'
+            : config?.dry_run
+              ? ' Сейчас включён учебный режим: сообщения пишутся в notifications.log на сервере.'
+              : null}
         </p>
       </div>
+
+      {!canSend && (
+        <p className="border-l-4 border-amber-500 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          Отправка заблокирована: нужна заявка со статусами «Выполнена» и «Оплачено».
+        </p>
+      )}
 
       <div className="flex flex-wrap gap-4">
         <label className="inline-flex items-center gap-2 text-sm font-semibold text-navy">
@@ -99,6 +113,7 @@ const SendResults: React.FC<SendResultsProps> = ({
             checked={emailOn}
             onChange={(e) => setEmailOn(e.target.checked)}
             className="h-4 w-4 accent-primary"
+            disabled={!canSend}
           />
           <Mail size={16} className="text-primary" /> Email
         </label>
@@ -108,6 +123,7 @@ const SendResults: React.FC<SendResultsProps> = ({
             checked={tgOn}
             onChange={(e) => setTgOn(e.target.checked)}
             className="h-4 w-4 accent-primary"
+            disabled={!canSend}
           />
           <MessageCircle size={16} className="text-primary" /> Telegram
         </label>
@@ -122,8 +138,9 @@ const SendResults: React.FC<SendResultsProps> = ({
               className="lab-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required={emailOn}
+              required={canSend && emailOn}
               placeholder="name@mail.com"
+              disabled={!canSend}
             />
           </label>
         )}
@@ -135,10 +152,8 @@ const SendResults: React.FC<SendResultsProps> = ({
               value={chatId}
               onChange={(e) => setChatId(e.target.value)}
               placeholder="например 123456789"
+              disabled={!canSend}
             />
-            <span className="mt-1 block text-xs text-slate-400">
-              Напишите боту /start и узнайте свой chat id (можно через @userinfobot).
-            </span>
           </label>
         )}
       </div>
@@ -154,7 +169,7 @@ const SendResults: React.FC<SendResultsProps> = ({
         </p>
       )}
 
-      <button type="submit" disabled={loading} className="lab-button-primary gap-2">
+      <button type="submit" disabled={loading || !canSend} className="lab-button-primary gap-2">
         <Send size={16} />
         {loading ? 'Отправка...' : 'Отправить результаты'}
       </button>

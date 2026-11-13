@@ -10,6 +10,9 @@ class CoreStrengthTest(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, nullable=True, index=True)
+    work_status = Column(String(20), nullable=False, default="in_progress")
+    payment_status = Column(String(20), nullable=False, default="unpaid")
+    service_order_id = Column(Integer, nullable=True, index=True)
 
     applicant_info = Column(String(100), nullable=False)
     manufacturer_info = Column(String(100), nullable=False)

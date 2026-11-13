@@ -17,6 +17,7 @@ class WaterproofCreate(BaseModel):
 
     sample_diameters_mm: list[float] = Field(..., min_length=6, max_length=6)
     sample_dry_pressures_mpa: list[float] = Field(..., min_length=6, max_length=6)
+    service_order_id: int | None = None
 
     @field_validator("project_mark")
     @classmethod
@@ -59,6 +60,9 @@ class WaterproofResponse(WaterproofCreate):
     project_mark_met: bool | None = None
     samples_ok_at_series: int | None = None
     conclusion: str | None = None
+    work_status: str | None = "in_progress"
+    payment_status: str | None = "unpaid"
+    service_order_id: int | None = None
 
     class Config:
         from_attributes = True

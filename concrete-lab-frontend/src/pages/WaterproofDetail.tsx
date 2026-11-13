@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { deleteWaterproofTest, fetchWaterproofTest, WaterproofRecord } from '../api/waterproof'
 import { User } from '../api/auth'
 import SendResults from '../components/SendResults'
+import ProtocolOrderLink from '../components/ProtocolOrderLink'
 
 interface WaterproofDetailProps {
   user: User | null
@@ -16,6 +17,7 @@ const WaterproofDetail: React.FC<WaterproofDetailProps> = ({ user, onLoginClick 
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState(false)
+  const [canSend, setCanSend] = useState(false)
 
   useEffect(() => {
     if (!user || !id) return
@@ -156,10 +158,21 @@ const WaterproofDetail: React.FC<WaterproofDetailProps> = ({ user, onLoginClick 
             {record.conclusion}
           </p>
         )}
+        <ProtocolOrderLink
+          kind="waterproof"
+          protocolId={record.id}
+          serviceOrderId={record.service_order_id}
+          user={user}
+          onChange={({ service_order_id, can_send }) => {
+            setRecord({ ...record, service_order_id })
+            setCanSend(can_send)
+          }}
+        />
         <SendResults
           kind="waterproof"
           protocolId={record.id}
           defaultEmail={user.email}
+          canSend={canSend}
         />
         {error && <p className="text-sm text-red-600">{error}</p>}
       </div>

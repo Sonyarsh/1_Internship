@@ -6,6 +6,7 @@ import frost_schemas
 from database import get_session
 from deps import get_current_user
 from frost_calc import catalog, evaluate
+from protocol_lifecycle import validate_order_for_kind
 from user_model import User
 
 router = APIRouter()
@@ -47,6 +48,7 @@ def create_frost(
 ):
     item = frost_model.FrostTest(user_id=current_user.id)
     _fill(item, data)
+    item.service_order_id = validate_order_for_kind(db, "frost", data.service_order_id)
     db.add(item)
     db.commit()
     db.refresh(item)

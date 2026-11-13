@@ -87,17 +87,20 @@ def send_email(to_email: str, subject: str, body: str) -> ChannelResult:
 
 def send_telegram(chat_id: str, text: str) -> ChannelResult:
     chat_id = (chat_id or "").strip() or TELEGRAM_CHAT_ID
+
+    # Учебный режим / без токена: пишем в лог даже без chat_id
+    if DRY_RUN or not TELEGRAM_BOT_TOKEN:
+        target = chat_id or "(не указан)"
+        _write_dry("telegram", target, "Telegram", text)
+        mode = "dry-run" if DRY_RUN else "TELEGRAM_BOT_TOKEN не задан — сохранено локально"
+        return ChannelResult("telegram", True, f"{mode}: chat {target}")
+
     if not chat_id:
         return ChannelResult(
             "telegram",
             False,
             "Не указан chat_id. Напишите боту /start и укажите id, либо задайте TELEGRAM_CHAT_ID в .env",
         )
-
-    if DRY_RUN or not TELEGRAM_BOT_TOKEN:
-        _write_dry("telegram", chat_id, "Telegram", text)
-        mode = "dry-run" if DRY_RUN else "TELEGRAM_BOT_TOKEN не задан — сохранено локально"
-        return ChannelResult("telegram", True, f"{mode}: chat {chat_id}")
 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = json.dumps(

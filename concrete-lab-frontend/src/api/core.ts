@@ -41,6 +41,9 @@ export type CoreRecord = CoreInput & {
   series_strength_mpa?: number | null
   samples_count?: number | null
   conclusion?: string | null
+  work_status?: string | null
+  payment_status?: string | null
+  service_order_id?: number | null
 }
 
 function authHeaders() {

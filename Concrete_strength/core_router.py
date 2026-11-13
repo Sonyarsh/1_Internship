@@ -6,6 +6,7 @@ import core_schemas
 from core_calc import catalog, evaluate
 from database import get_session
 from deps import get_current_user
+from protocol_lifecycle import validate_order_for_kind
 from user_model import User
 
 router = APIRouter()
@@ -50,6 +51,7 @@ def create_core(
 ):
     item = core_model.CoreStrengthTest(user_id=current_user.id)
     _fill(item, data)
+    item.service_order_id = validate_order_for_kind(db, "core", data.service_order_id)
     db.add(item)
     db.commit()
     db.refresh(item)

@@ -1,14 +1,24 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-import core_model
-import frost_model
-import models
-import waterproof_model
 from database import get_session
 from deps import get_current_user
-from notify_schemas import NotifyConfigResponse, NotifySendRequest, NotifySendResponse, ChannelStatus
+from notify_schemas import (
+    ChannelStatus,
+    NotifyConfigResponse,
+    NotifySendRequest,
+    NotifySendResponse,
+    ProtocolLinkOrder,
+    ProtocolLinkResponse,
+)
 from notify_service import notify_status, send_email, send_telegram
+from protocol_lifecycle import (
+    can_send_results,
+    get_linked_order,
+    get_protocol,
+    require_can_send,
+    validate_order_for_kind,
+)
 from user_model import User
 
 router = APIRouter()
@@ -17,6 +27,35 @@ router = APIRouter()
 @router.get("/status", response_model=NotifyConfigResponse)
 def get_notify_status(_user: User = Depends(get_current_user)):
     return notify_status()
+
+
+@router.patch("/link-order", response_model=ProtocolLinkResponse)
+def link_protocol_order(
+    payload: ProtocolLinkOrder,
+    db: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.role == "admin":
+        item = get_protocol(db, payload.kind, payload.protocol_id, user_id=None)
+    else:
+        item = get_protocol(db, payload.kind, payload.protocol_id, user_id=current_user.id)
+
+    order_id = validate_order_for_kind(db, payload.kind, payload.service_order_id)
+    item.service_order_id = order_id
+    db.add(item)
+    db.commit()
+    db.refresh(item)
+
+    order = get_linked_order(db, item)
+    return ProtocolLinkResponse(
+        kind=payload.kind,
+        protocol_id=item.id,
+        service_order_id=item.service_order_id,
+        order_status=order.status if order else None,
+        order_payment_status=order.payment_status if order else None,
+        order_title=order.service_title if order else None,
+        can_send=can_send_results(order),
+    )
 
 
 @router.post("/send", response_model=NotifySendResponse)
@@ -47,25 +86,21 @@ def send_protocol_results(
     )
 
 
-def _owned_or_404(item, label: str):
-    if item is None:
-        raise HTTPException(status_code=404, detail=f"{label} не найден")
-    return item
-
-
 def _build_message(db: Session, kind: str, protocol_id: int, user: User) -> tuple[str, str]:
+    item = get_protocol(db, kind, protocol_id, user_id=user.id)
+    order = require_can_send(db, item)
+    status_line = (
+        f"Заявка №{order.id}: {order.service_title} — "
+        f"работа={order.status}, оплата={order.payment_status}"
+    )
+
     if kind == "compression":
-        item = _owned_or_404(
-            db.query(models.ConcreteStrength)
-            .filter(models.ConcreteStrength.id == protocol_id, models.ConcreteStrength.user_id == user.id)
-            .first(),
-            "Протокол сжатия",
-        )
         subject = f"БетонЛаб: сжатие #{item.id} — {item.concrete_class}"
         body = "\n".join(
             [
                 "Протокол испытания на сжатие (ГОСТ 10180)",
                 f"ID: {item.id}",
+                status_line,
                 f"Заявитель: {item.applicant_info}",
                 f"Продукция: {item.product_id}",
                 f"Класс бетона: {item.concrete_class}",
@@ -77,17 +112,12 @@ def _build_message(db: Session, kind: str, protocol_id: int, user: User) -> tupl
         return subject, body
 
     if kind == "frost":
-        item = _owned_or_404(
-            db.query(frost_model.FrostTest)
-            .filter(frost_model.FrostTest.id == protocol_id, frost_model.FrostTest.user_id == user.id)
-            .first(),
-            "Протокол морозостойкости",
-        )
         subject = f"БетонЛаб: морозостойкость #{item.id} — {item.concrete_class}"
         body = "\n".join(
             [
                 "Протокол морозостойкости (ГОСТ 10060)",
                 f"ID: {item.id}",
+                status_line,
                 f"Заявитель: {item.applicant_info}",
                 f"Класс бетона: {item.concrete_class}",
                 f"Метод: {item.method}, среда: {item.exposure}",
@@ -100,20 +130,12 @@ def _build_message(db: Session, kind: str, protocol_id: int, user: User) -> tupl
         return subject, body
 
     if kind == "waterproof":
-        item = _owned_or_404(
-            db.query(waterproof_model.WaterproofTest)
-            .filter(
-                waterproof_model.WaterproofTest.id == protocol_id,
-                waterproof_model.WaterproofTest.user_id == user.id,
-            )
-            .first(),
-            "Протокол водонепроницаемости",
-        )
         subject = f"БетонЛаб: водонепроницаемость #{item.id} — {item.concrete_class}"
         body = "\n".join(
             [
                 "Протокол водонепроницаемости (ГОСТ 12730.5, мокрое пятно)",
                 f"ID: {item.id}",
+                status_line,
                 f"Заявитель: {item.applicant_info}",
                 f"Класс бетона: {item.concrete_class}",
                 f"Режим: {item.mode}",
@@ -125,30 +147,19 @@ def _build_message(db: Session, kind: str, protocol_id: int, user: User) -> tupl
         )
         return subject, body
 
-    if kind == "core":
-        item = _owned_or_404(
-            db.query(core_model.CoreStrengthTest)
-            .filter(
-                core_model.CoreStrengthTest.id == protocol_id,
-                core_model.CoreStrengthTest.user_id == user.id,
-            )
-            .first(),
-            "Протокол сжатия в конструкциях",
-        )
-        subject = f"БетонЛаб: сжатие в конструкциях #{item.id} — {item.concrete_class}"
-        body = "\n".join(
-            [
-                "Протокол сжатия образцов из конструкций (ГОСТ 28570)",
-                f"ID: {item.id}",
-                f"Заявитель: {item.applicant_info}",
-                f"Конструкция: {item.structure_name}",
-                f"Класс бетона: {item.concrete_class}",
-                f"Образцов: {item.samples_count if item.samples_count is not None else len(item.samples or [])}",
-                f"Rср: {item.series_strength_mpa if item.series_strength_mpa is not None else '—'} МПа",
-                f"Заключение: {item.conclusion or '—'}",
-                f"Пользователь: {user.name} <{user.email}>",
-            ]
-        )
-        return subject, body
-
-    raise HTTPException(status_code=400, detail="Неизвестный тип протокола")
+    subject = f"БетонЛаб: сжатие в конструкциях #{item.id} — {item.concrete_class}"
+    body = "\n".join(
+        [
+            "Протокол сжатия образцов из конструкций (ГОСТ 28570)",
+            f"ID: {item.id}",
+            status_line,
+            f"Заявитель: {item.applicant_info}",
+            f"Конструкция: {item.structure_name}",
+            f"Класс бетона: {item.concrete_class}",
+            f"Образцов: {item.samples_count if item.samples_count is not None else len(item.samples or [])}",
+            f"Rср: {item.series_strength_mpa if item.series_strength_mpa is not None else '—'} МПа",
+            f"Заключение: {item.conclusion or '—'}",
+            f"Пользователь: {user.name} <{user.email}>",
+        ]
+    )
+    return subject, body

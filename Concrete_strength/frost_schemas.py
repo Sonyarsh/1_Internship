@@ -33,6 +33,7 @@ class FrostCreate(BaseModel):
     surface_scaling: bool = False
     decorative_surface: bool = False
     density_spread_kg_m3: float | None = Field(default=None, ge=0, le=500)
+    service_order_id: int | None = None
 
     @model_validator(mode="after")
     def masses_match_samples(self):
@@ -64,6 +65,9 @@ class FrostResponse(FrostCreate):
     achieved_mark: str | None = None
     project_mark_met: bool | None = None
     conclusion: str | None = None
+    work_status: str | None = "in_progress"
+    payment_status: str | None = "unpaid"
+    service_order_id: int | None = None
 
     class Config:
         from_attributes = True

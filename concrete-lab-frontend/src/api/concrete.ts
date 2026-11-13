@@ -54,6 +54,9 @@ export type ConcreteStrengthRecord = ConcreteStrengthCreate & {
   constant_c2?: number | null
   perpendicularity_deviation?: number | null
   fc_cube_batch_i_sample_j_series_k?: number | null
+  work_status?: string | null
+  payment_status?: string | null
+  service_order_id?: number | null
 }
 
 function authHeaders() {

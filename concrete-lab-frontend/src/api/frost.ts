@@ -74,6 +74,9 @@ export type FrostRecord = FrostInput & {
   achieved_mark?: string | null
   project_mark_met?: boolean | null
   conclusion?: string | null
+  work_status?: string | null
+  payment_status?: string | null
+  service_order_id?: number | null
 }
 
 function authHeaders() {

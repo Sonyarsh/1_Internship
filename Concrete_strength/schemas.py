@@ -98,6 +98,7 @@ class ConcreteStrengthCreate(BaseModel):
 
     visual_inspection_broken: Optional[str] = None
     destruction_scheme: Optional[str] = None
+    service_order_id: Optional[int] = None
 
     @field_validator("scale_factor_alpha")
     @classmethod
@@ -166,6 +167,9 @@ class ConcreteStrengthResponse(BaseModel):
 
     visual_inspection_broken: Optional[str] = None
     destruction_scheme: Optional[str] = None
+    work_status: Optional[str] = "in_progress"
+    payment_status: Optional[str] = "unpaid"
+    service_order_id: Optional[int] = None
 
     class Config:
         from_attributes = True

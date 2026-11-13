@@ -15,6 +15,22 @@ class NotifySendRequest(BaseModel):
     telegram_chat_id: str | None = Field(default=None, max_length=64)
 
 
+class ProtocolLinkOrder(BaseModel):
+    kind: ProtocolKind
+    protocol_id: int = Field(..., gt=0)
+    service_order_id: int | None = None
+
+
+class ProtocolLinkResponse(BaseModel):
+    kind: ProtocolKind
+    protocol_id: int
+    service_order_id: int | None
+    order_status: str | None = None
+    order_payment_status: str | None = None
+    order_title: str | None = None
+    can_send: bool
+
+
 class ChannelStatus(BaseModel):
     channel: str
     ok: bool

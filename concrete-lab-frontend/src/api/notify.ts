@@ -11,6 +11,22 @@ export type NotifySendPayload = {
   telegram_chat_id?: string | null
 }
 
+export type ProtocolLinkPayload = {
+  kind: ProtocolKind
+  protocol_id: number
+  service_order_id?: number | null
+}
+
+export type ProtocolLinkResult = {
+  kind: ProtocolKind
+  protocol_id: number
+  service_order_id: number | null
+  order_status?: string | null
+  order_payment_status?: string | null
+  order_title?: string | null
+  can_send: boolean
+}
+
 export type ChannelStatus = {
   channel: string
   ok: boolean
@@ -48,4 +64,20 @@ export async function sendProtocolResults(
     headers: authHeaders(),
   })
   return data
+}
+
+export async function linkProtocolOrder(
+  payload: ProtocolLinkPayload
+): Promise<ProtocolLinkResult> {
+  const { data } = await api.patch<ProtocolLinkResult>('/notify/link-order', payload, {
+    headers: authHeaders(),
+  })
+  return data
+}
+
+export function orderAllowsSend(
+  orderStatus?: string | null,
+  paymentStatus?: string | null
+): boolean {
+  return orderStatus === 'completed' && paymentStatus === 'paid'
 }

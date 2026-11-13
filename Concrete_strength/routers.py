@@ -6,6 +6,7 @@ import models
 import schemas
 from database import get_session
 from deps import get_current_user
+from protocol_lifecycle import validate_order_for_kind
 from user_model import User
 
 router = APIRouter()
@@ -32,7 +33,11 @@ def create_record(
     db: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    db_item = models.ConcreteStrength(**data.model_dump())
+    payload = data.model_dump()
+    payload["service_order_id"] = validate_order_for_kind(
+        db, "compression", payload.get("service_order_id")
+    )
+    db_item = models.ConcreteStrength(**payload)
     db_item.user_id = current_user.id
     db_item.calculate_fields()
     db.add(db_item)

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { FlaskConical, LockKeyhole, X } from 'lucide-react'
 import { loginUser, saveSession, User } from '../api/auth'
 import axios from 'axios'
+import PasswordInput from './PasswordInput'
 
 interface AuthModalProps {
   notice?: string
@@ -25,7 +26,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ notice, onClose, onLogin }) => {
       const result = await loginUser({ email, password })
       saveSession(result.access_token, result.user)
       onLogin(result.user)
-      navigate('/profile')
+      navigate(result.user.role === 'admin' ? '/admin' : '/profile')
     } catch (err) {
       if (axios.isAxiosError(err)) {
         if (!err.response) {
@@ -93,14 +94,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ notice, onClose, onLogin }) => {
             </div>
             <div>
               <label className="lab-label">Пароль</label>
-              <input
-                type="password"
+              <PasswordInput
                 required
                 minLength={6}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="lab-input"
+                onChange={setPassword}
                 placeholder="••••••••"
+                autoComplete="current-password"
               />
             </div>
 
