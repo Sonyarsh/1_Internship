@@ -61,8 +61,8 @@ const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogout }) => {
             Контакты
           </Link>
           {user?.role === 'admin' && (
-            <Link to="/contact-requests" className="transition-colors hover:text-primary">
-              Заявки
+            <Link to="/admin" className="transition-colors hover:text-primary">
+              Админ
             </Link>
           )}
         </nav>
@@ -79,7 +79,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogout }) => {
           {user ? (
             <div className="hidden items-center gap-2 border-l border-slate-200 pl-3 sm:flex">
               <Link
-                to="/profile"
+                to={user.role === 'admin' ? '/admin' : '/profile'}
                 className="flex items-center gap-2 rounded-md px-2 py-2 text-navy transition hover:bg-primary-light"
               >
                 <User size={18} />
@@ -138,8 +138,8 @@ const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogout }) => {
               Контакты
             </Link>
             {user?.role === 'admin' && (
-              <Link to="/contact-requests" className={navLinkClass} onClick={closeMenu}>
-                Заявки
+              <Link to="/admin" className={navLinkClass} onClick={closeMenu}>
+                Админ
               </Link>
             )}
 
@@ -155,7 +155,7 @@ const Header: React.FC<HeaderProps> = ({ user, onLoginClick, onLogout }) => {
               {user ? (
                 <>
                   <Link
-                    to="/profile"
+                    to={user.role === 'admin' ? '/admin' : '/profile'}
                     className="flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-bold text-navy hover:bg-primary-light"
                     onClick={closeMenu}
                   >

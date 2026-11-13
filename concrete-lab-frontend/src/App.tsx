@@ -8,6 +8,7 @@ import About from './pages/About'
 import Services from './pages/Services'
 import Registration from './pages/Registration'
 import Profile from './pages/Profile'
+import AdminProfile from './pages/AdminProfile'
 import Favorites from './pages/Favorites'
 import Cart from './pages/Cart'
 import TestsHub from './pages/TestsHub'
@@ -103,7 +104,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
-          <Route path="/services" element={<Services userRole={user?.role} />} />
+          <Route path="/services" element={<Services user={user} />} />
           <Route path="/tests" element={<TestsHub />} />
           <Route
             path="/tests/compression"
@@ -148,21 +149,31 @@ const App: React.FC = () => {
           <Route
             path="/profile"
             element={
-              <Profile
+              user?.role === 'admin' ? (
+                <Navigate to="/admin" replace />
+              ) : (
+                <Profile
+                  user={user}
+                  onLogout={handleLogout}
+                  onUserUpdate={setUser}
+                />
+              )
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <AdminProfile
                 user={user}
                 onLogout={handleLogout}
                 onUserUpdate={setUser}
+                onLoginClick={openLogin}
               />
             }
           />
           <Route
             path="/contact-requests"
-            element={
-              <ContactRequests
-                user={user}
-                onLoginClick={openLogin}
-              />
-            }
+            element={<Navigate to="/admin" replace />}
           />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/cart" element={<Cart />} />

@@ -1,14 +1,18 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ClipboardList, Cylinder, Droplets, Gauge, Phone, Snowflake } from 'lucide-react'
+import { User } from '../api/auth'
+import { ServiceKey } from '../api/serviceOrders'
+import OrderServiceModal, { OrderServiceInfo } from '../components/OrderServiceModal'
 
 interface ServicesProps {
-  userRole?: string
+  user: User | null
 }
 
-const services = [
+const services: (OrderServiceInfo & { id: number; description: string; icon: typeof Gauge })[] = [
   {
     id: 1,
+    key: 'compression',
     icon: Gauge,
     title: 'Испытание на сжатие',
     description:
@@ -18,6 +22,7 @@ const services = [
   },
   {
     id: 2,
+    key: 'frost',
     icon: Snowflake,
     title: 'Морозостойкость',
     description:
@@ -27,6 +32,7 @@ const services = [
   },
   {
     id: 3,
+    key: 'waterproof',
     icon: Droplets,
     title: 'Водонепроницаемость',
     description:
@@ -36,6 +42,7 @@ const services = [
   },
   {
     id: 4,
+    key: 'core' as ServiceKey,
     icon: Cylinder,
     title: 'Испытание на сжатие в конструкциях',
     description:
@@ -45,7 +52,9 @@ const services = [
   },
 ]
 
-const Services: React.FC<ServicesProps> = ({ userRole }) => {
+const Services: React.FC<ServicesProps> = ({ user }) => {
+  const [orderService, setOrderService] = useState<OrderServiceInfo | null>(null)
+
   return (
     <div>
       <section className="bg-navy py-20 text-white">
@@ -55,14 +64,9 @@ const Services: React.FC<ServicesProps> = ({ userRole }) => {
             Услуги лаборатории
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-sky-100">
-            Прайс и перечень работ. Оформление заявки — через контакты.
-            Ведение протоколов сотрудниками — в разделе «Испытания».
+            Прайс и заказ испытания заявкой. Онлайн-оплаты пока нет — после заявки
+            лаборатория свяжется и выставит счёт. Протоколы ведут в разделе «Испытания».
           </p>
-          {userRole === 'admin' && (
-            <button className="mt-6 rounded-md bg-white px-4 py-2 font-bold text-navy">
-              Добавить услугу
-            </button>
-          )}
         </div>
       </section>
 
@@ -88,8 +92,22 @@ const Services: React.FC<ServicesProps> = ({ userRole }) => {
                 <p className="mt-3 flex-grow leading-relaxed text-slate-600">
                   {service.description}
                 </p>
-                <div className="mt-7 border-t border-slate-100 pt-5">
+                <div className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5">
                   <span className="text-xl font-extrabold text-navy">{service.price}</span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOrderService({
+                        key: service.key,
+                        title: service.title,
+                        price: service.price,
+                        norm: service.norm,
+                      })
+                    }
+                    className="rounded-md bg-primary px-5 py-2.5 text-sm font-bold text-white transition hover:bg-primary-dark"
+                  >
+                    Заказать
+                  </button>
                 </div>
               </article>
             )
@@ -99,25 +117,19 @@ const Services: React.FC<ServicesProps> = ({ userRole }) => {
         <div className="mt-14 grid gap-4 border border-slate-200 bg-[#f3f7f9] p-8 md:grid-cols-2">
           <div>
             <h3 className="flex items-center gap-2 text-lg font-extrabold text-navy">
-              <Phone size={20} className="text-primary" /> Заказать испытание
+              <Phone size={20} className="text-primary" /> Как это работает
             </h3>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              Оставьте контакты — лаборатория свяжется и согласует сроки.
+              Выбираете услугу → оформляете заявку → лаборатория подтверждает и согласовывает
+              оплату вне сайта. Статус заявки — в профиле.
             </p>
-            <Link
-              to="/#contacts"
-              className="mt-5 inline-flex rounded-md bg-navy px-5 py-2.5 font-bold text-white transition hover:bg-primary"
-            >
-              К контактам
-            </Link>
           </div>
           <div>
             <h3 className="flex items-center gap-2 text-lg font-extrabold text-navy">
               <ClipboardList size={20} className="text-primary" /> Работать с протоколами
             </h3>
             <p className="mt-2 text-sm leading-relaxed text-slate-600">
-              Вход в цифровые журналы сжатия, морозостойкости и водонепроницаемости —
-              для авторизованных пользователей.
+              Цифровые журналы испытаний — для авторизованных пользователей лаборатории.
             </p>
             <Link
               to="/tests"
@@ -128,6 +140,14 @@ const Services: React.FC<ServicesProps> = ({ userRole }) => {
           </div>
         </div>
       </div>
+
+      {orderService && (
+        <OrderServiceModal
+          service={orderService}
+          user={user}
+          onClose={() => setOrderService(null)}
+        />
+      )}
     </div>
   )
 }

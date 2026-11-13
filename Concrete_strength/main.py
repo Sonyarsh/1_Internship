@@ -11,12 +11,15 @@ from frost_router import router as frost_router
 from waterproof_router import router as waterproof_router
 from core_router import router as core_router
 from notify_router import router as notify_router
+from service_order_router import router as service_order_router
+from admin_router import router as admin_router
 import user_model  # таблица users
 import models  # таблица concrete_strengths
 import contact_model  # таблица contact_requests
 import frost_model  # таблица frost_tests
 import waterproof_model  # таблица waterproof_tests
 import core_model  # таблица core_strength_tests
+import service_order_model  # таблица service_orders
 
 
 def ensure_tables():
@@ -107,6 +110,16 @@ app.include_router(
     notify_router,
     prefix="/notify",
     tags=["Notify email / Telegram"],
+)
+app.include_router(
+    service_order_router,
+    prefix="/service_orders",
+    tags=["Service orders"],
+)
+app.include_router(
+    admin_router,
+    prefix="/admin",
+    tags=["Admin"],
 )
 
 

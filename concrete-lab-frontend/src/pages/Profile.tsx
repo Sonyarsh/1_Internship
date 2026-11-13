@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { User, Settings, LogOut, Package, FlaskConical } from 'lucide-react'
+import { User, Settings, LogOut, Package, FlaskConical, ClipboardList } from 'lucide-react'
 import axios from 'axios'
 import {
   changePassword,
@@ -14,9 +14,15 @@ import { fetchRecords } from '../api/concrete'
 import { fetchFrostTests } from '../api/frost'
 import { fetchWaterproofTests } from '../api/waterproof'
 import { fetchCoreTests } from '../api/core'
+import {
+  fetchMyServiceOrders,
+  ORDER_STATUS_LABEL,
+  PAYMENT_STATUS_LABEL,
+  ServiceOrder,
+} from '../api/serviceOrders'
 import { COUNTRY_CODES, findCountry, splitPhone } from '../phone'
 
-type Tab = 'profile' | 'orders' | 'settings'
+type Tab = 'profile' | 'protocols' | 'serviceOrders' | 'settings'
 
 type ProfileOrder = {
   key: string
@@ -56,6 +62,10 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
   const [ordersLoading, setOrdersLoading] = useState(false)
   const [ordersError, setOrdersError] = useState('')
 
+  const [serviceOrders, setServiceOrders] = useState<ServiceOrder[]>([])
+  const [serviceLoading, setServiceLoading] = useState(false)
+  const [serviceError, setServiceError] = useState('')
+
   useEffect(() => {
     if (!user) return
     const parsed = splitPhone(user.phone)
@@ -65,7 +75,7 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
   }, [user])
 
   useEffect(() => {
-    if (!user || tab !== 'orders') return
+    if (!user || tab !== 'protocols') return
     let cancelled = false
     ;(async () => {
       setOrdersLoading(true)
@@ -129,11 +139,37 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
           if (axios.isAxiosError(err) && err.response?.status === 401) {
             setOrdersError('Сессия истекла — войдите снова')
           } else {
-            setOrdersError('Не удалось загрузить заказы')
+            setOrdersError('Не удалось загрузить протоколы')
           }
         }
       } finally {
         if (!cancelled) setOrdersLoading(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [user, tab])
+
+  useEffect(() => {
+    if (!user || tab !== 'serviceOrders') return
+    let cancelled = false
+    ;(async () => {
+      setServiceLoading(true)
+      setServiceError('')
+      try {
+        const data = await fetchMyServiceOrders()
+        if (!cancelled) setServiceOrders(data)
+      } catch (err) {
+        if (!cancelled) {
+          if (axios.isAxiosError(err) && err.response?.status === 401) {
+            setServiceError('Сессия истекла — войдите снова')
+          } else {
+            setServiceError('Не удалось загрузить заявки')
+          }
+        }
+      } finally {
+        if (!cancelled) setServiceLoading(false)
       }
     })()
     return () => {
@@ -256,7 +292,8 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
       <div className="flex flex-col gap-8 md:flex-row">
         <aside className="h-fit w-full bg-navy p-4 text-white md:w-64">
           {navBtn('profile', <User size={20} />, 'Личные данные')}
-          {navBtn('orders', <Package size={20} />, 'Мои заказы')}
+          {navBtn('protocols', <FlaskConical size={20} />, 'Мои протоколы')}
+          {navBtn('serviceOrders', <ClipboardList size={20} />, 'Мои заявки')}
           {navBtn('settings', <Settings size={20} />, 'Настройки')}
           <div className="mt-4 border-t border-white/10 pt-4">
             <button
@@ -357,13 +394,13 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
             </div>
           )}
 
-          {tab === 'orders' && (
+          {tab === 'protocols' && (
             <div className="lab-card">
               <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-black text-navy">Мои заказы</h2>
+                  <h2 className="text-2xl font-black text-navy">Мои протоколы</h2>
                   <p className="mt-2 text-sm text-slate-500">
-                    Протоколы испытаний, привязанные к вашему аккаунту.
+                    Результаты испытаний, привязанные к вашему аккаунту.
                   </p>
                 </div>
                 <Link to="/tests" className="lab-button-primary gap-2">
@@ -381,7 +418,7 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
               {!ordersLoading && !ordersError && orders.length === 0 && (
                 <div className="border border-dashed border-slate-200 bg-[#f3f7f9] px-6 py-12 text-center">
                   <Package className="mx-auto text-slate-300" size={40} />
-                  <p className="mt-4 font-semibold text-navy">Заказов пока нет</p>
+                  <p className="mt-4 font-semibold text-navy">Протоколов пока нет</p>
                   <p className="mt-2 text-sm text-slate-500">
                     Создайте протокол на странице «Испытания».
                   </p>
@@ -424,6 +461,72 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout, onUserUpdate }) => {
                   <p className="bg-[#f3f7f9] px-4 py-3 text-xs text-slate-500">
                     Записей: {orders.length}
                   </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab === 'serviceOrders' && (
+            <div className="lab-card">
+              <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-black text-navy">Мои заявки</h2>
+                  <p className="mt-2 text-sm text-slate-500">
+                    Заказы услуг по прайсу. Оплата вне сайта — статус обновляет лаборатория.
+                  </p>
+                </div>
+                <Link to="/services" className="lab-button-primary gap-2">
+                  <ClipboardList size={17} /> К услугам
+                </Link>
+              </div>
+
+              {serviceLoading && <p className="text-sm text-slate-500">Загрузка...</p>}
+              {serviceError && (
+                <p className="border-l-4 border-red-600 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {serviceError}
+                </p>
+              )}
+
+              {!serviceLoading && !serviceError && serviceOrders.length === 0 && (
+                <div className="border border-dashed border-slate-200 bg-[#f3f7f9] px-6 py-12 text-center">
+                  <ClipboardList className="mx-auto text-slate-300" size={40} />
+                  <p className="mt-4 font-semibold text-navy">Заявок пока нет</p>
+                  <p className="mt-2 text-sm text-slate-500">
+                    Оформите заказ на странице «Услуги».
+                  </p>
+                </div>
+              )}
+
+              {!serviceLoading && serviceOrders.length > 0 && (
+                <div className="overflow-x-auto border-t-4 border-primary">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-navy text-white">
+                      <tr>
+                        <th className="px-4 py-3 font-bold">№</th>
+                        <th className="px-4 py-3 font-bold">Услуга</th>
+                        <th className="px-4 py-3 font-bold">Цена</th>
+                        <th className="px-4 py-3 font-bold">Кол-во</th>
+                        <th className="px-4 py-3 font-bold">Статус</th>
+                        <th className="px-4 py-3 font-bold">Оплата</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {serviceOrders.map((o) => (
+                        <tr key={o.id} className="border-t border-slate-100">
+                          <td className="px-4 py-3 font-semibold text-navy">{o.id}</td>
+                          <td className="px-4 py-3">{o.service_title}</td>
+                          <td className="px-4 py-3">{o.price_label}</td>
+                          <td className="px-4 py-3">{o.quantity}</td>
+                          <td className="px-4 py-3">
+                            {ORDER_STATUS_LABEL[o.status] ?? o.status}
+                          </td>
+                          <td className="px-4 py-3">
+                            {PAYMENT_STATUS_LABEL[o.payment_status] ?? o.payment_status}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
